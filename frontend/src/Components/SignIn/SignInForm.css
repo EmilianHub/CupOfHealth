@@ -1,0 +1,47 @@
+.Card1
+{
+    margin-top: 12%;
+    height:100vh;
+    font-weight: bold;
+}
+
+.button1{
+    margin: 10px 0 0 0;
+    padding: 7px 10px;
+    borderRadius: 3px;
+    background: linear-gradient(to bottom right, greenyellow, green);
+    width: 100%;
+    fontSize: 15px;
+    color: Black;
+    display: block;
+    font-weight: bold;
+}
+.button1:hover{
+    cursor: pointer;
+    background: linear-gradient(to bottom right, lawngreen, palegreen);
+}
+.formStyle1  {
+    margin: 100px auto;
+    padding: 20px;
+    border: 1px solid #c9c9c9;
+    borderRadius: 5px;
+    background: linear-gradient(to bottom right, #bf80ff, #809fff);
+    color:white;
+    width: 20%;
+
+}
+.labelStyle1  {
+    fontFamily: Arial, Helvetica, sans-serif;
+    fontSize: 15px;
+}
+
+.inputStyle1  {
+    width: 100%;
+    border: 1px solid #bfbfbf;
+}
+
+.Card1 .formHeader{
+    margin-bottom: -5%;
+    text-align: center;
+    font-size: 23px;
+}

@@ -1,18 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
-import axios from "axios";
-import {useState, useEffect} from "react";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import SingInForm from "./Components/SignIn/SignInForm"
+import React from "react"
 
 function App() {
-
-  const [napis, setNapis] = useState("");
-
-  useEffect(() => {
-    axios.get("http://localhost:8000/hello/CupOf").then(res => setNapis(res.data.message))
-  })
-
   return (
-    <p>{napis}</p>
+      <div>
+        <Router>
+          {/*<NavBar/>*/}
+          <Routes>
+            <Route  path="/" exact element/>
+            <Route path="/sing_in" element={<SingInForm/>}/>
+          </Routes>
+        </Router>
+      </div>
   );
 }
 
