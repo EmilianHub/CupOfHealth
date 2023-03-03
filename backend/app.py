@@ -1,5 +1,5 @@
-from flask import Flask
-from database.dbConnection import db
+from flask import Flask, request
+from database.dbConnection import conn
 
 app = Flask(__name__)
 
@@ -9,12 +9,13 @@ def hello_world():  # put application's code here
     return 'Hello World!'
 
 
-@app.post('/<name>')
-def create_user(name: str):
-    collection = db.get_collection("User")
-    collection.insert_one({"name": name})
-    return "User added"
+@app.post("/")
+def create_user():
+    args = request.get_json()
+    name = args.get("name")
+    password = args.get("password")
+    return f"{name} and {password}"
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, port=5000)
