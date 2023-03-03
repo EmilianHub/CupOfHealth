@@ -1,8 +1,8 @@
 {
   "intents": [
     {"tag": "greeting",
-     "patterns": ["Hi there", "How are you", "Is anyone there?","Hey","Hola", "Hello", "Good day", "Hey", "Ekse", "Hi"],
-     "responses": ["Hi stranger", "Hello there", "yes, how can I help", "Ey watsupp", "Hola", "Hey dude", "You again"]
+     "patterns": ["Hej", "Jak się masz?", "Hejka", "Witam", "Hello", "Dzień dobry", "Hey", "Hi"],
+     "responses": ["Witaj nieznajomy", "Hello there", "Hej , jak mogę Ci pomóc", "Witaj!", "Dzień dobry", "Hey dude"]
     },
     {"tag": "goodbye",
      "patterns": ["Bye", "See you later", "Goodbye", "Ok bye", "Bye Bye"],
@@ -20,9 +20,33 @@
       "patterns": ["What is your name", "Whats your name", "Tell me your name", "Who are you", "Tell me about yourself", "You are"],
       "responses": ["I am CupOfHealth", "My name is CupOfHealth", "You can call me bro", "CupOfHealth is my name"]
       },
-      {"tag": "options",
-       "patterns": ["What do you do", "How can you help", "What do you know", "What is your purpose", "How can you help"],
-       "responses": ["Tell me more about your well-being and I may be able to help."]
-      }
+    {"tag": "źle się czuję",
+      "patterns": ["Źle się czuję", "Nie czuję się najlepiej"],
+      "responses": ["Podaj mi swoje objawy.", "Powiedz co się dzieje."]
+    },
+    {"tag": "gryp",
+      "patterns":["Jest mi zimno", "Mam dreszcze", "Moje samopoczucie nie jest najlepsze", "Mam złe samopoczucie", "Boli mnie gardło"],
+      "responses": ["Twoje objawy mogą wskazywać na różne choroby. Podaj ich więcej, abym mógł ocenić to dokładniej"]
+    },
+    {"tag": "gorączka",
+      "patterns": ["Mam gorączkę", "gorączka"],
+      "responses": ["Czy poza gorączką doskwierają Ci jeszcze jakieś objawy?"]
+    },
+    {"tag": "gorączka2",
+      "patterns": ["Bolą mnie mięśnie|Jestem osłabiony|Jestem osłabiona"],
+      "responses": ["To może być grypa. Jednak dla stu procentowej pewności potrzebuje jeszcze więcej objawów."]
+    },
+    {"tag": "głowa",
+      "patterns": ["Boli mnie głowa"],
+      "responses": ["Powiedz mi, gdzie Twój ból jest zlokalizowany?", "W jakich okolicach odczuwasz ból?"]
+    },
+    {"tag": "gdzie boli głowa",
+      "patterns": ["w okolicach czoła", "w okolicach oczu", "w okolicach czoła i oczu"],
+      "responses": ["Takie bole głowy występują najczęściej przy grypie. Jeśli czujesz coś jeszcze, daj mi znać. Pomoże mi to w trafnej diagnozie"]
+    },
+    {"tag": "grypa",
+      "patterns": ["(?=.*ból mięśni)(?=.*gorączka)"],
+      "responses": ["To grypa"]
+    }
   ]
 }
