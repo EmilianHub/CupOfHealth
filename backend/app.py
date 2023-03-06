@@ -1,6 +1,6 @@
 from flask import Flask, request
 from backend.userManagement.passwordRestore import PasswordRestart
-import backend.userManagement.restartCodeCache as restartCodeCache
+
 app = Flask(__name__)
 
 
