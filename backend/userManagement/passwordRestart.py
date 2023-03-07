@@ -1,11 +1,13 @@
 import random
-from backend.database.dbConnection import conn
+from backend.database.dbConnection import db_session
+from sqlalchemy import select, func
 import smtplib
 import os
 from enum import Enum
 from dotenv import load_dotenv
 from email.mime.text import MIMEText
 import backend.userManagement.restartCodeCache as restartCodeCache
+from backend.jpa.userJPA import User
 
 load_dotenv()
 
@@ -29,13 +31,9 @@ class PasswordRestart:
 
     def __isUserExist(self, email: str):
         try:
-            query = "select count(*) from public.user where lower(email) = %s"
-            cursor = conn.cursor()
-            cursor.execute(query, (email.lower(),))
-            result = cursor.fetchone()
-            cursor.close()
-
-            return result[0] != 0
+            query = select(func.count("*")).select_from(User).where(User.email == email)
+            result = db_session.execute(query).one()
+            return result.count != 0
         except(Exception) as error:
             print("Error occurred while looking for user: ", error)
 

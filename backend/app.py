@@ -1,8 +1,7 @@
 from flask import Flask, request
-from backend.userManagement.passwordRestore import PasswordRestart
+from backend.userManagement.passwordRestart import PasswordRestart
 
 app = Flask(__name__)
-
 
 @app.get('/')
 def hello_world():  # put application's code here
