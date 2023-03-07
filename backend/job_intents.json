@@ -32,21 +32,41 @@
       "patterns": ["Mam gorączkę", "gorączka"],
       "responses": ["Czy poza gorączką doskwierają Ci jeszcze jakieś objawy?"]
     },
-    {"tag": "gorączka2",
-      "patterns": ["Bolą mnie mięśnie|Jestem osłabiony|Jestem osłabiona"],
-      "responses": ["To może być grypa. Jednak dla stu procentowej pewności potrzebuje jeszcze więcej objawów."]
-    },
+
     {"tag": "głowa",
       "patterns": ["Boli mnie głowa"],
       "responses": ["Powiedz mi, gdzie Twój ból jest zlokalizowany?", "W jakich okolicach odczuwasz ból?"]
     },
     {"tag": "gdzie boli głowa",
       "patterns": ["w okolicach czoła", "w okolicach oczu", "w okolicach czoła i oczu"],
-      "responses": ["Takie bole głowy występują najczęściej przy grypie. Jeśli czujesz coś jeszcze, daj mi znać. Pomoże mi to w trafnej diagnozie"]
+      "responses": ["Takie bole głowy występują przy różnych chorobach, ale najczęściej przy grypie. Jeśli czujesz coś jeszcze, daj mi znać. Pomoże mi to w trafnej diagnozie"]
     },
     {"tag": "grypa",
-      "patterns": ["(?=.*ból mięśni)(?=.*gorączka)"],
+      "patterns": ["Bolą mnie mięśnie", "Jestem osłabiony", "Jestem osłabiona"],
       "responses": ["To grypa"]
+    },
+    {"tag": "grypa_opis",
+      "patterns": ["Podaj mi objawy grypy", "Jakie sa objawy grypy?", "Objawy grypy", "Grypa objawy"],
+      "responses": ["Najczęstsze objawy grypy to między innymi:\nogólne – gorączka, uczucie zimna, dreszcze, ból mięśni, ból głowy (najczęściej w okolicy czoła i oczu), uczucie rozbicia i osłabienia, złe ogólne samopoczucie;\nze strony dróg oddechowych – ból gardła, suchy kaszel; czasem także uczucie zatkania nosa i wyciek wydzieliny z nosa (zwykle o niedużym nasileniu).\nPowyższym objawom mogą towarzyszyć (zwłaszcza u dzieci) – objawy zapalenia krtani lub ucha środkowego, nudności, wymioty i/lub łagodna biegunka. U osób starszych głównymi objawami mogą być znaczne osłabienie lub zaburzenia świadomości.\nChoroba zwykle ustępuje samoistnie po 3–7 dniach, ale kaszel i uczucie rozbicia mogą się utrzymywać nawet ponad 2 tygodnie. Do 50% zakażeń przebiega bez objawów.\nGorączka (zwłaszcza u małych dzieci) może być bardzo wysoka. Choroba zwykle ustępuje samoistnie po 3–7 dniach, ale kaszel i złe samopoczucie mogą się utrzymywać nawet dłużej niż 2 tygodnie."]
+
+    },
+    {"tag": "angina",
+      "patterns": ["Strasznie boli mnie gardło", "Boli mnie gardło", "Okropnie mnie boli gardło", "Boli mnie gardło podczas przełykania", "Odczuwam ból podczas przełykania", "podczas przełykania"],
+      "responses": ["Często jest to jeden z objawów anginy. Czy coś więcej Ci dolega?"]
+    },
+    {"tag": "angina_gorączka",
+      "patterns": ["Wysoka gorączka", "Mam wysoką gorączkę", "Mam gorączkę powyżej 38 stopni", "Mam ponad 38 stopni", "38 stopni", "ponad 38 stopni gorączki"],
+      "responses": ["Takie temperatury mogą być już zagrożeniem dla zdrowia i życia. Jeśli gorączka Ci nie spadnie, natychmiast skonsultuj się z lekarzem."]
+
+    },
+
+    {"tag": "angina_inne",
+      "patterns": ["Czerwona blona śluzowa", "czerwoną błonę śluzową", "powiększone węzły chłonne","zaczerwieniona błona", "zaczerwienioną błonę", "obrzęknięty język", "malinowy język", "spuchnięty język", "czerwone plamki"],
+      "responses": ["Takie objawy mogą być typowe dla anginy. Zalecam kontakt z lekarzem."]
+    },
+    {"tag": "angina_opis",
+      "patterns": ["Podaj mi objawy anginy", "Jakie sa objawy anginy?", "Objawy anginy", "Angina objawy"],
+      "responses": ["Do objawów anginy paciorkowcowej należą: silny ból gardła i ból podczas połykania; ból głowy; czasem ból brzucha, nudności i wymioty (raczej u dzieci); gorączka (>38°C); zapalenie gardła i migdałków podniebiennych – błona śluzowa jest żywoczerwona lub krwistoczerwona, może towarzyszyć temu obrzęk; krwistoczerwony i obrzęknięty języczek podniebienny; język początkowo obłożony, później malinowy; wybroczyny (czerwone plamki) na błonie śluzowej podniebienia; tkliwe, powiększone węzły chłonne szyjne przednie."]
     }
-  ]
+      ]
 }
