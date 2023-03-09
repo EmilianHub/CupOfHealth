@@ -1,5 +1,5 @@
 from flask import Flask, request
-from database.dbConnection import db
+from backend.userManagement.passwordRestore import PasswordRestart
 
 app = Flask(__name__)
 
@@ -9,11 +9,20 @@ def hello_world():  # put application's code here
     return 'Hello World!'
 
 
-@app.post('/<name>')
-def create_user(name: str):
-    collection = db.get_collection("User")
-    collection.insert_one({"name": name})
-    return "User added"
+@app.post("/")
+def create_user():
+    args = request.get_json()
+    name = args.get("name")
+    password = args.get("password")
+    return f"{name} and {password}"
+
+
+@app.post("/password/restart")
+def restartUserPassword():
+    passwordRestart = PasswordRestart()
+    args = request.get_json()
+    email = args.get("email")
+    return passwordRestart.tryRestartPassword(email)
 
 
 @app.post("/sign_in")
@@ -25,4 +34,4 @@ def sign_in(email: str):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, port=5000)
