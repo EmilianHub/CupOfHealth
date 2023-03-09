@@ -1,9 +1,11 @@
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import SingInForm from "./components/SignIn/SignInForm";
 import React from "react"
-import Chat from "./components/Chat/Chat"
-import RegisterForm from "./components/Register/RegisterForm"
-import RemindPassForm from "./components/RemindPass/RemindPassForm";
+import ChatPage from "./pages/ChatPage"
+import RegisterPage from "./pages/RegisterPage"
+import RemindPassPage from "./pages/RemindPassPage";
+import VerifyPage from "./pages/VerifyPage";
+import SignInPage from "./pages/SignInPage";
 
 
 
@@ -13,10 +15,11 @@ function App() {
         <Router>
           {/*<NavBar/>*/}
           <Routes>
-              <Route path="/" element={<Chat/>} />
-            <Route path="/sign_in" element={<SingInForm/>}/>
-              <Route path="/register" element={<RegisterForm/>}/>
-              <Route path="/remind" element={<RemindPassForm/>}/>
+              <Route path="/" element={<ChatPage/>} />
+            <Route path="/sign_in" element={<SignInPage/>}/>
+              <Route path="/register" element={<RegisterPage/>}/>
+              <Route path="/remind" element={<RemindPassPage/>}/>
+              <Route path="/verify" element={<VerifyPage/>}/>
            </Routes>
         </Router>
       </div>

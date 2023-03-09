@@ -1,16 +1,15 @@
 import {useEffect} from "react";
-import {Axios} from "axios";
+import Axios from "axios";
+import RegisterForm from "../components/Register/RegisterForm";
 
 export default function  RegisterPage(){
-    Axios.defaults.withCredentials = true;
 
-    useEffect(async () => {
-        await Axios.get('http://localhost:5000').then((response) => {
 
-        })
-    })
+
+
+
     return(
-        <div></div>
+        <div><RegisterForm/></div>
 
     )
 }

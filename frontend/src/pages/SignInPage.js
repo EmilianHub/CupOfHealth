@@ -1,16 +1,11 @@
 import {useEffect} from "react";
-import {Axios} from "axios";
+import Axios from "axios";
+import SignInForm from "../components/SignIn/SignInForm";
 
 export default function  SignInPage(){
-    Axios.defaults.withCredentials = true;
-
-    useEffect(async () => {
-        await Axios.get('http://localhost:5000').then((response) => {
-
-        })
-    })
     return(
-        <div></div>
-
+        <div>
+            <SignInForm/>
+        </div>
     )
 }
