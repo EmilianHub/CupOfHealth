@@ -7,6 +7,7 @@ from backend.email.emailService import EmailService
 
 emailService = EmailService()
 
+
 class UserService:
     # That makes the class Singleton
     __instance = None
@@ -23,11 +24,11 @@ class UserService:
             isSent = emailService.sendEmailWithRestartCode(email, code)
             if isSent:
                 restartCodeCache.add(email, code)
-                return "Message has been send to given email"
+                return "Message has been send to given email", 200
 
-            return "Something gone wrong, message has not been sent"
+            return "Something gone wrong, message has not been sent", 400
 
-        return "User with given email doesn't exist"
+        return "User with given email doesn't exist", 404
 
     def __isUserExist(self, email: str):
         try:
@@ -42,8 +43,8 @@ class UserService:
     def verifyRestartCode(self, email: str, code: int):
         tempCache = restartCodeCache.getWithCode(code)
         if tempCache is not None and tempCache.keys().__contains__(email):
-            return "Correct"
-        return "Incorrect"
+            return "Correct", 200
+        return "Incorrect", 400
 
     def updatePassword(self, email: str, password: str):
         try:
@@ -51,9 +52,9 @@ class UserService:
             result = db_session.execute(query)
             db_session.commit()
             if result.rowcount != 0:
-                return "Password updated"
-            return "Something gone wrong. Password has not been updated"
+                return "Password updated", 200
+            return "Something gone wrong. Password has not been updated", 400
         except(Exception) as error:
             print("Error occurred while updating user: ", error)
 
-        return "Something gone wrong. Password has not been updated"
+        return "Something gone wrong. Password has not been updated", 400

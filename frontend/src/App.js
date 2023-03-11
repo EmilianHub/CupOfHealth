@@ -16,7 +16,7 @@ function App() {
           {/*<NavBar/>*/}
           <Routes>
               <Route path="/" element={<ChatPage/>} />
-            <Route path="/sign_in" element={<SignInPage/>}/>
+              <Route path="/sign_in" element={<SignInPage/>}/>
               <Route path="/register" element={<RegisterPage/>}/>
               <Route path="/remind" element={<RemindPassPage/>}/>
               <Route path="/verify" element={<VerifyPage/>}/>

@@ -19,6 +19,7 @@ def verifyRestartCode():
     code = args.get("code")
     return userService.verifyRestartCode(email, code)
 
+
 @user.post("/new_password")
 def updatePassword():
     args = request.get_json()
