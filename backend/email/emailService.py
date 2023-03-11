@@ -1,11 +1,8 @@
-import random
-from backend.database.dbConnection import conn
+from email.mime.text import MIMEText
 import smtplib
 import os
 from enum import Enum
 from dotenv import load_dotenv
-from email.mime.text import MIMEText
-import backend.userManagement.restartCodeCache as restartCodeCache
 
 load_dotenv()
 
@@ -13,35 +10,17 @@ SENDER_EMAIL = os.getenv("EMAIL")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 SUBJECT = "Your CupOfHealth account password restart code"
 
-class PasswordRestart:
-    def tryRestartPassword(self, email: str):
-        code = random.randint(1000, 9999)
-        isExist = self.__isUserExist(email)
-        if isExist:
-            isSent = self.__sendEmailWithRestartCode(email, code)
-            if isSent:
-                restartCodeCache.add(email, code)
-                return "Message has been send to given email"
 
-            return "Something gone wrong, message has not been sent"
+class EmailService:
+    # That makes the class Singleton
+    __instance = None
 
-        return "User with given email doesn't exist"
+    def __new__(cls, *args, **kwargs):
+        if cls.__instance is None:
+            cls.__instance = super(EmailService, cls).__new__(cls)
+        return cls.__instance
 
-    def __isUserExist(self, email: str):
-        try:
-            query = "select count(*) from public.user where lower(email) = %s"
-            cursor = conn.cursor()
-            cursor.execute(query, (email.lower(),))
-            result = cursor.fetchone()
-            cursor.close()
-
-            return result[0] != 0
-        except(Exception) as error:
-            print("Error occurred while looking for user: ", error)
-
-        return False
-
-    def __sendEmailWithRestartCode(self, email: str, code: int):
+    def sendEmailWithRestartCode(self, email: str, code: int):
         body = self.__prepareMessageBody(code)
         msg = MIMEText(body, "html")
         msg['Subject'] = SUBJECT
