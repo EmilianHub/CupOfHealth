@@ -1,12 +1,10 @@
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
-import SingInForm from "./components/SignIn/SignInForm";
 import React from "react"
 import ChatPage from "./pages/ChatPage"
 import RegisterPage from "./pages/RegisterPage"
 import RemindPassPage from "./pages/RemindPassPage";
 import VerifyPage from "./pages/VerifyPage";
 import SignInPage from "./pages/SignInPage";
-
 
 
 function App() {
