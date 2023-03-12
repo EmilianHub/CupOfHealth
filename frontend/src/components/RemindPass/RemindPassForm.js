@@ -15,7 +15,6 @@ function RemindPass() {
         axios.post('http://localhost:5000/user/send_code', {
             email: email
         }).then((res) => {
-            setRes(res.status)
             switch (res.status) {
                 case HttpStatusCode.Ok:
                     window.alert(`Kod został wysłany na adres ${email}.`);
