@@ -4,9 +4,10 @@ from sqlalchemy import select, update, func
 import backend.userManagement.restartCodeCache as restartCodeCache
 from backend.jpa.userJPA import User
 from backend.email.emailService import EmailService
+import re
 
 emailService = EmailService()
-
+passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
 
 class UserService:
     # That makes the class Singleton
@@ -47,14 +48,17 @@ class UserService:
         return "Incorrect", 400
 
     def updatePassword(self, email: str, password: str):
-        try:
-            query = update(User).where(User.email == email).values(password=password)
-            result = db_session.execute(query)
-            db_session.commit()
-            if result.rowcount != 0:
-                return "Password updated", 200
-            return "Something gone wrong. Password has not been updated", 400
-        except(Exception) as error:
-            print("Error occurred while updating user: ", error)
+        if passwordRegex.match(str(password)):
+            try:
+                query = update(User).where(User.email == email).values(password=password)
+                result = db_session.execute(query)
+                db_session.commit()
+                if result.rowcount != 0:
+                    return "Password updated", 200
+                return "Something gone wrong. Password has not been updated", 400
+            except(Exception) as error:
+                print("Error occurred while updating user: ", error)
 
-        return "Something gone wrong. Password has not been updated", 400
+            return "Something gone wrong. Password has not been updated", 400
+
+        return "Password should contain at least one uppercase and one special character", 400

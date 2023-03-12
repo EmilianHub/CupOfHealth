@@ -29,7 +29,14 @@ export default function VerifyForm() {
                     break;
             }
         }).catch(() => {
-            setMessage(`Nie udało się wysłać kodu. Spróbuj ponownie później.`);
+            switch(res.status) {
+                case HttpStatusCode.BadRequest:
+                    window.alert("Hasło powinno zawierać co najmniej jedną duża literę i jeden znak specjalny")
+                    break;
+                default:
+                    window.alert(`Nie udało się zmienić hasła. Spróbuj ponownie później.`)
+                    break;
+            }
         });
     }
 
@@ -55,6 +62,8 @@ export default function VerifyForm() {
                 <input className="input_pass"
                        type="password"
                        id="new_pass1"
+                       pattern={"^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$"}
+                       title={"Hasło powinno zawierać co najmniej jedną duża literę i jeden znak specjalny"}
                        onChange={(e) => {
                            verifyPasswordsAreIdentical(retypePassword)
                            setPassword(e.target.value)
