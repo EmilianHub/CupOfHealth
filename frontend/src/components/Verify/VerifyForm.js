@@ -28,8 +28,8 @@ export default function VerifyForm() {
                     window.alert(`Nie udało się zmienić hasła. Spróbuj ponownie później.`)
                     break;
             }
-        }).catch(() => {
-            switch(res.status) {
+        }).catch((err) => {
+            switch(err.response.status) {
                 case HttpStatusCode.BadRequest:
                     window.alert("Hasło powinno zawierać co najmniej jedną duża literę i jeden znak specjalny")
                     break;
