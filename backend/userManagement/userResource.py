@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 from backend.userManagement.userService import UserService
 
-
 user = Blueprint("user", __name__)
 
 userService = UserService()
@@ -19,6 +18,7 @@ def verifyRestartCode():
     email = args.get("email")
     code = args.get("code")
     return userService.verifyRestartCode(email, code)
+
 
 @user.post("/new_password")
 def updatePassword():
