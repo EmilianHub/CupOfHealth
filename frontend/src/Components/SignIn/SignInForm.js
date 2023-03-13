@@ -12,10 +12,10 @@ export default function SignInForm(){
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        axios.post("http://localhost:5000/sign_in", { email, password })
+        axios.post("http://localhost:5000/user/sign_in", { email: email, password: password })
             .then((response) => {
-                const token = response.data.token;
-                localStorage.setItem("token", token);
+                // const token = response.data.token;
+                // localStorage.setItem("token", token);
                 navigate("/");
             })
             .catch((error) => {

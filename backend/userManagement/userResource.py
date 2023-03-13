@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from backend.userManagement.userService import UserService
-from backend.userManagement.SignIn import SignIn
+
 
 user = Blueprint("user", __name__)
 
@@ -32,4 +32,4 @@ def SignIn():
     args = request.get_json()
     email = args.get("email")
     password = args.get("password")
-    return "successfully logged in"
+    return userService.login(email, password)

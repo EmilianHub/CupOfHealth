@@ -8,9 +8,6 @@ app.register_blueprint(user, url_prefix="/user")
 def hello_world():  # put application's code here
     return 'Hello World!'
 
-@app.route('/sign_in')
-def login():
-    return render_template('/sign_in')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -16,10 +16,9 @@ function Chat() {
                    <div className="info">Przykładowe komendy:</div>
                     -Opisz [nazwa choroby] <br/>
                     -Mam [podaj objawy] <br/>
-                    -Podaj profilaktyke dla [nazwa choroby] <br/><br/><br/><br/>
+                    -Podaj profilaktyke dla [nazwa choroby]
                 </div>
                 <div className="chat-input">
-
                     <input type="text" placeholder="Rozpocznij czat..." />
                     <button>Wyślij</button>
                 </div>

@@ -57,3 +57,19 @@ class UserService:
             print("Error occurred while updating user: ", error)
 
         return "Something gone wrong. Password has not been updated"
+
+    def login(self,email: str, password: str):
+
+        try:
+            query=select(User).where(User.email == email).where(User.password == password)
+            result =  db_session.execute(query).one()
+            if result is not None:
+                return 'Zalogowany', 200
+
+            return 'Nieprawidłowy login lub hasło', 401
+
+        except(Exception) as error:
+            print(error)
+
+        return 'Nieprawidłowy login lub hasło', 401
+
