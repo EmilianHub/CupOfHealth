@@ -1,9 +1,9 @@
 import random
-from backend.database.dbConnection import db_session
+from dbConnection import db_session
 from sqlalchemy import select, update, func
-import backend.userManagement.restartCodeCache as restartCodeCache
-from backend.jpa.userJPA import User
-from backend.email.emailService import EmailService
+import restartCodeCache as restartCodeCache
+from userJPA import User
+from emailService import EmailService
 import re
 
 emailService = EmailService()

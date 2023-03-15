@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
-from backend.userManagement.userResource import user
-from backend.geolocation.locationResource import location
+from userResource import user
+from locationResource import location
 from flask_cors import CORS
 import processor
 
