@@ -8,7 +8,9 @@ from keras.models import load_model
 model = load_model('chatbot_model.h5')
 import json
 import random
+import diseaseCache
 intents = json.loads(open('job_intents.json', encoding='utf-8').read())
+disease_intents = json.loads(open('disease_intents.json', encoding='utf-8').read())
 words = pickle.load(open('words.pkl','rb'))
 classes = pickle.load(open('classes.pkl','rb'))
 
@@ -47,18 +49,33 @@ def predict_class(sentence, model):
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
     return return_list
 
-def getResponse(ints, intents_json):
+def getResponse(ints, msg):
+    result = "Ask the right question"
     tag = ints[0]['intent']
-    list_of_intents = intents_json['intents']
+    list_of_intents = intents['intents']
+    list_of_disease_intents = disease_intents['intents']
     for i in list_of_intents:
         if(i['tag']== tag):
             result = random.choice(i['responses'])
             break
-        else:
-            result = "You must ask the right questions"
+
+    diseaseCache.add(msg)
+    matching = []
+
+    for i in list_of_disease_intents:
+        if(i['tag']== tag):
+            patterns = np.array(i['patterns'])
+            for m in set(diseaseCache.user_msg):
+                string = list(filter(lambda r: r.lower() == m.lower(), patterns))
+                if len(string) > 0:
+                    matching.append(string.pop())
+            if len(matching)/len(patterns) > 0.45:
+                return random.choice(i['responses'])
+            else:
+                return random.choice(list_of_disease_intents[len(list_of_disease_intents)-1]['responses'])
     return result
 
 def chatbot_response(msg):
     ints = predict_class(msg, model)
-    res = getResponse(ints, intents)
+    res = getResponse(ints, msg)
     return res
