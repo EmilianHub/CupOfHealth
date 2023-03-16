@@ -33,3 +33,7 @@ def SignIn():
     email = args.get("email")
     password = args.get("password")
     return userService.login(email, password)
+
+@user.post("/logout")
+def LogOut():
+    return userService.logout()

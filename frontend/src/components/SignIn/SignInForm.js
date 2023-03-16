@@ -1,7 +1,9 @@
 import React,{ useState } from "react";
 import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
-import {useNavigate} from "react-router-dom";import { Link } from 'react-router-dom';
+import {useNavigate} from "react-router-dom";
+import { Link } from 'react-router-dom';
+import {createNewCookie} from "../CookiesManager/CookiesManager";
 
 
 export default function SignInForm(){
@@ -13,11 +15,15 @@ export default function SignInForm(){
                 {email:email, password:password}
 
         ).then((response) => {
-            if (
-                response.status === HttpStatusCode.Ok )
+            if (response.status === HttpStatusCode.Ok )
+            {
+                createNewCookie(4)
+                navigate("/");
+                window.location.reload();
+            }
             // const token = response.data.token;
             // localStorage.setItem("token", token);
-            navigate("/");
+
         })
             .catch((error) => {
                 if(
@@ -27,6 +33,7 @@ export default function SignInForm(){
                 console.log(error);
             });
     }
+
 
     return(
 

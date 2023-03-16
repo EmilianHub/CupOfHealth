@@ -5,9 +5,16 @@ import backend.userManagement.restartCodeCache as restartCodeCache
 from backend.jpa.userJPA import User
 from backend.email.emailService import EmailService
 import re
+from flask import Flask, redirect, url_for
+from flask_login import LoginManager, logout_user
+
+app = Flask(__name__)
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
+
+login_manager=LoginManager()
+login_manager.init_app(app)
 
 class UserService:
     # That makes the class Singleton
@@ -77,3 +84,8 @@ class UserService:
             print(error)
 
         return 'Nieprawidłowy login lub hasło', 401
+
+    def logout(self):
+        logout_user()
+        return redirect(url_for('/'))
+
