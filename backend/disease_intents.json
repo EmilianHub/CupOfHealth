@@ -61,6 +61,7 @@
     {
       "tag": "grypa",
       "patterns": [
+
         "ból mięśni", "wysoka gorączka", "gorączka 39 stopni", "mam gorączkę 39", "mam gprączkę 40", "gorączka 40 stopni", "bół mięśni", "bolą mnie mięśnie", "mam złe samopoczucie", "boli mnie gardło"
       ],
       "responses": [
