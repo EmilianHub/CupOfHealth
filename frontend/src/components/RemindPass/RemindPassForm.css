@@ -1,7 +1,9 @@
 .container_pass{
+    padding-top: 6%;
     text-align: center;
     margin: auto;
-    padding: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 .form_pass {
     display: flex;
