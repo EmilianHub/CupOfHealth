@@ -1,0 +1,76 @@
+{
+  "intents": [
+    {
+      "tag": "gryp",
+      "patterns": [
+        "Jest mi zimno",
+        "Mam dreszcze",
+        "Moje samopoczucie nie jest najlepsze",
+        "Mam złe samopoczucie",
+        "Boli mnie gardło"
+      ],
+      "responses": [
+        "Twoje objawy mogą wskazywać na różne choroby. Podaj ich więcej, abym mógł ocenić to dokładniej"
+      ]
+    },
+    {
+      "tag": "gorączka",
+      "patterns": [
+        "Mam gorączkę",
+        "gorączka"
+      ],
+      "responses": [
+        "Czy poza gorączką doskwierają Ci jeszcze jakieś objawy?"
+      ]
+    },
+    {
+      "tag": "gorączka2",
+      "patterns": [
+        "Bolą mnie mięśnie", "Jestem osłabiony","Jestem osłabiona"
+      ],
+      "responses": [
+        "To może być grypa. Jednak dla stu procentowej pewności potrzebuje jeszcze więcej objawów."
+      ]
+    },
+    {
+      "tag": "głowa",
+      "patterns": [
+        "Boli mnie głowa"
+      ],
+      "responses": [
+        "Powiedz mi, gdzie Twój ból jest zlokalizowany?",
+        "W jakich okolicach odczuwasz ból?"
+      ]
+    },
+    {
+      "tag": "gdzie boli głowa",
+      "patterns": [
+        "w okolicach czoła",
+        "w okolicy czoła",
+        "w okolicy oczu",
+        "w okolicy czoła i oczu",
+        "koło oczu",
+        "koło czoła",
+        "w okolicach oczu",
+        "w okolicach czoła i oczu"
+      ],
+      "responses": [
+        "Takie bole głowy występują najczęściej przy grypie. Jeśli czujesz coś jeszcze, daj mi znać. Pomoże mi to w trafnej diagnozie"
+      ]
+    },
+    {
+      "tag": "grypa",
+      "patterns": [
+        "ból mięśni", "wysoka gorączka", "gorączka 39 stopni", "mam gorączkę 39", "mam gprączkę 40", "gorączka 40 stopni", "bół mięśni", "bolą mnie mięśnie", "mam złe samopoczucie", "boli mnie gardło"
+      ],
+      "responses": [
+        "To grypa"
+      ]
+    },
+    {
+      "tag": "mało odpowiedzi",
+      "patterns": [],
+      "responses": ["Podaj mi więcej objawów", "Potrzebuje więcej informacji", "Chciałbym wiedzieć więcej", "To dalej za mało informacji"]
+    }
+  ]
+}
