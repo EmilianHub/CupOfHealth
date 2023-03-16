@@ -10,8 +10,7 @@ export default function Logout(){
         deleteCookies()
                 navigate("/");
                 window.location.reload(false)
-
-    }, [navigate])
+    }, [])
     return(
         <div></div>
         // <Sidebar/>
