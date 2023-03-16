@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from backend.userManagement.userService import UserService
+from userService import UserService
 
 user = Blueprint("user", __name__)
 

@@ -1,4 +1,4 @@
-from backend.database.dbConnection import engine, Base
+from dbConnection import engine, Base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 

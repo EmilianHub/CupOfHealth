@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from backend.geolocation.locationService import getCurrentLocation
+from locationService import getCurrentLocation
 location = Blueprint("location", __name__)
 
 

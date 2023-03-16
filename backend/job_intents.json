@@ -1,0 +1,28 @@
+{
+  "intents": [
+    {"tag": "greeting",
+     "patterns": ["Hej", "Jak się masz?", "Hejka", "Witam", "Hello", "Dzień dobry", "Hey", "Hi"],
+     "responses": ["Witaj nieznajomy", "Hello there", "Hej , jak mogę Ci pomóc", "Witaj!", "Dzień dobry", "Hey dude"]
+    },
+    {"tag": "goodbye",
+     "patterns": ["Do widzenia", "Pa", "Narazie"],
+     "responses": ["Pa","Do widzenia", "Dziękuję za skorzystanie z moich usług", "Miło było Cię widzieć", "Bye Bye"]
+    },
+    {"tag": "thanks",
+     "patterns": ["Dzięki", "Dziękuję", "To bardzo pomocne", "Wspaniale, dziękuję", "Bardzo dziękuję za pomoc", "Dziękuję za pomoc"],
+     "responses": ["Nie ma za co", "Cieszę się, że mogłem pomóc", "Polecam się na przyszłość", "Mam nadzieję, że jeszcze skorzystasz z moich usług"]
+    },
+    {"tag": "noanswer",
+     "patterns": [],
+     "responses": ["Musisz o coś zapytać", "Na puste wiadomości nie odpowiadam", "Napisz coś, abym mógł Ci odpowiedzieć"]
+     },
+     {"tag": "name",
+      "patterns": ["Jak masz na imię?", "Jak się nazywasz", "Przedstaw się", "Kim jesteś?", "Powiedz mi coś o sobie"],
+      "responses": ["Jestem CupOfHealth", "Moje imię to CupOfHealth", "Nazywam się CupOFHealth", "CupOfHealth - potrafię zdiagnozować Twoją chorobę, jeśli podasz mi wystarczająco dużo objawów"]
+      },
+    {"tag": "źle się czuję",
+      "patterns": ["Źle się czuję", "Nie czuję się najlepiej"],
+      "responses": ["Podaj mi swoje objawy.", "Powiedz co się dzieje."]
+    }
+  ]
+}
