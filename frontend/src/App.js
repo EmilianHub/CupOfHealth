@@ -1,18 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
-import axios from "axios";
-import {useState, useEffect} from "react";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import React from "react"
+import ChatPage from "./pages/ChatPage"
+import RegisterPage from "./pages/RegisterPage"
+import RemindPassPage from "./pages/RemindPassPage";
+import VerifyPage from "./pages/VerifyPage";
+import SignInPage from "./pages/SignInPage";
+
 
 function App() {
-
-  const [napis, setNapis] = useState("");
-
-  useEffect(() => {
-    axios.get("http://localhost:8000/hello/CupOf").then(res => setNapis(res.data.message))
-  })
-
   return (
-    <p>{napis}</p>
+      <div>
+        <Router>
+          {/*<NavBar/>*/}
+          <Routes>
+              <Route path="/" element={<ChatPage/>} />
+              <Route path="/sign_in" element={<SignInPage/>}/>
+              <Route path="/register" element={<RegisterPage/>}/>
+              <Route path="/remind" element={<RemindPassPage/>}/>
+              <Route path="/verify" element={<VerifyPage/>}/>
+           </Routes>
+        </Router>
+      </div>
   );
 }
 

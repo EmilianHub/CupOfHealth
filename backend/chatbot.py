@@ -17,7 +17,9 @@ classes = []
 documents = []
 ignore_words = ['?', '!']
 data_file = open('job_intents.json', encoding='utf-8').read()
+disease_file = open('disease_intents.json', encoding='utf-8').read()
 intents = json.loads(data_file)
+disease_intents = json.loads(disease_file)
 
 
 for intent in intents['intents']:
@@ -31,6 +33,18 @@ for intent in intents['intents']:
 
         if intent['tag'] not in classes:
             classes.append(intent['tag'])
+
+for dIntents in disease_intents['intents']:
+    for pattern in dIntents['patterns']:
+
+        w = nltk.word_tokenize(pattern)
+        words.extend(w)
+
+        documents.append((w, dIntents['tag']))
+
+
+        if dIntents['tag'] not in classes:
+            classes.append(dIntents['tag'])
 
 words = [lemmatizer.lemmatize(w.lower()) for w in words if w not in ignore_words]
 words = sorted(list(set(words)))

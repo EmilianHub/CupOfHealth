@@ -5,48 +5,24 @@
      "responses": ["Witaj nieznajomy", "Hello there", "Hej , jak mogę Ci pomóc", "Witaj!", "Dzień dobry", "Hey dude"]
     },
     {"tag": "goodbye",
-     "patterns": ["Bye", "See you later", "Goodbye", "Ok bye", "Bye Bye"],
-     "responses": ["See you!", "Have a nice day", "Sure Bye", "Later dude", "Sayoonara", "Peace out", "Sure dude", "Ciao"]
+     "patterns": ["Do widzenia", "Pa", "Narazie"],
+     "responses": ["Pa","Do widzenia", "Dziękuję za skorzystanie z moich usług", "Miło było Cię widzieć", "Bye Bye"]
     },
     {"tag": "thanks",
-     "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
-     "responses": ["Happy to help!", "Any time!", "My pleasure", "You are welcome", "Sure dude"]
+     "patterns": ["Dzięki", "Dziękuję", "To bardzo pomocne", "Wspaniale, dziękuję", "Bardzo dziękuję za pomoc", "Dziękuję za pomoc"],
+     "responses": ["Nie ma za co", "Cieszę się, że mogłem pomóc", "Polecam się na przyszłość", "Mam nadzieję, że jeszcze skorzystasz z moich usług"]
     },
     {"tag": "noanswer",
      "patterns": [],
-     "responses": ["Sorry, can't understand you", "Please give me more info", "Not sure I understand", "I am still here dude"]
+     "responses": ["Musisz o coś zapytać", "Na puste wiadomości nie odpowiadam", "Napisz coś, abym mógł Ci odpowiedzieć"]
      },
      {"tag": "name",
-      "patterns": ["What is your name", "Whats your name", "Tell me your name", "Who are you", "Tell me about yourself", "You are"],
-      "responses": ["I am CupOfHealth", "My name is CupOfHealth", "You can call me bro", "CupOfHealth is my name"]
+      "patterns": ["Jak masz na imię?", "Jak się nazywasz", "Przedstaw się", "Kim jesteś?", "Powiedz mi coś o sobie"],
+      "responses": ["Jestem CupOfHealth", "Moje imię to CupOfHealth", "Nazywam się CupOFHealth", "CupOfHealth - potrafię zdiagnozować Twoją chorobę, jeśli podasz mi wystarczająco dużo objawów"]
       },
     {"tag": "źle się czuję",
       "patterns": ["Źle się czuję", "Nie czuję się najlepiej"],
       "responses": ["Podaj mi swoje objawy.", "Powiedz co się dzieje."]
-    },
-    {"tag": "gryp",
-      "patterns":["Jest mi zimno", "Mam dreszcze", "Moje samopoczucie nie jest najlepsze", "Mam złe samopoczucie", "Boli mnie gardło"],
-      "responses": ["Twoje objawy mogą wskazywać na różne choroby. Podaj ich więcej, abym mógł ocenić to dokładniej"]
-    },
-    {"tag": "gorączka",
-      "patterns": ["Mam gorączkę", "gorączka"],
-      "responses": ["Czy poza gorączką doskwierają Ci jeszcze jakieś objawy?"]
-    },
-    {"tag": "gorączka2",
-      "patterns": ["Bolą mnie mięśnie|Jestem osłabiony|Jestem osłabiona"],
-      "responses": ["To może być grypa. Jednak dla stu procentowej pewności potrzebuje jeszcze więcej objawów."]
-    },
-    {"tag": "głowa",
-      "patterns": ["Boli mnie głowa"],
-      "responses": ["Powiedz mi, gdzie Twój ból jest zlokalizowany?", "W jakich okolicach odczuwasz ból?"]
-    },
-    {"tag": "gdzie boli głowa",
-      "patterns": ["w okolicach czoła", "w okolicach oczu", "w okolicach czoła i oczu"],
-      "responses": ["Takie bole głowy występują najczęściej przy grypie. Jeśli czujesz coś jeszcze, daj mi znać. Pomoże mi to w trafnej diagnozie"]
-    },
-    {"tag": "grypa",
-      "patterns": ["(?=.*ból mięśni)(?=.*gorączka)"],
-      "responses": ["To grypa"]
     }
   ]
 }
