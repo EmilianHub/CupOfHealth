@@ -72,15 +72,7 @@ class UserService:
         try:
             query= select(Diseases)
             result = db_session.scalars(query).fetchall()
-            js = []
-            for i in result:
-                js.append(f"tag: {i.choroba}")
-                js.append("patterns: [")
-                for j in i.objawy:
-                    js.append(j.objawy)
-                js.append("responses: [mam do w rzyci]")
-                js.append("}")
-            return js
+            return result
         except(Exception) as error:
             print(error)
             return "error"
