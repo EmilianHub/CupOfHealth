@@ -1,4 +1,7 @@
 import random
+
+from flask import jsonify
+
 from dbConnection import db_session
 from sqlalchemy import select, update, func
 import restartCodeCache as restartCodeCache
@@ -69,6 +72,17 @@ class UserService:
         try:
             query= select(Diseases)
             result = db_session.scalars(query).fetchall()
-            print(result)
+            js = []
+            for i in result:
+                js.append(f"tag: {i.choroba}")
+                js.append("patterns: [")
+                for j in i.objawy:
+                    js.append(j.objawy)
+                js.append("responses: [mam do w rzyci]")
+                js.append("}")
+            return js
         except(Exception) as error:
-            print("Error")
+            print(error)
+            return "error"
+
+        return "dupa"

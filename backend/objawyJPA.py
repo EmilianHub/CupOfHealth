@@ -9,5 +9,7 @@ class Symptoms(Base):
     id_objawy: Mapped[int] = mapped_column(primary_key=True)
     objawy: Mapped[str] = mapped_column(nullable=True)
 
+    def __repr__(self) -> str:
+        return f"Symptoms(id={self.id_objawy!r}, objawy={self.objawy!r})"
 
 Base.metadata.create_all(engine)
