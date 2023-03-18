@@ -5,6 +5,7 @@ user = Blueprint("user", __name__)
 
 userService = UserService()
 
+
 @user.post("/send_code")
 def sendRestartCode():
     args = request.get_json()
@@ -26,3 +27,15 @@ def updatePassword():
     email = args.get("email")
     password = args.get("password")
     return userService.updatePassword(email, password)
+
+
+@user.post("/sign_in")
+def SignIn():
+    args = request.get_json()
+    email = args.get("email")
+    password = args.get("password")
+    return userService.login(email, password)
+
+@user.post("/logout")
+def LogOut():
+    return userService.logout()
