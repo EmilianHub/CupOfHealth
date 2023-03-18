@@ -13,7 +13,9 @@ body{
     height: 500px;
     margin: 20px;
    #overflow-y: scroll;
-    padding: 10px;
+    padding-right: 10px;
+    padding-top: 6%;
+    padding-left: 10px ;
     text-align: center;
 }
 
@@ -26,7 +28,7 @@ body{
 .chat-input {
     display: flex;
     flex-direction: revert;
-    margin-top: 10px;
+    margin-top: 180px;
     height: 40px;
 
 }

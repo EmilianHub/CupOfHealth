@@ -1,4 +1,7 @@
 import random
+
+from flask_login import logout_user
+from flask import Flask, redirect, url_for
 from dbConnection import db_session
 from sqlalchemy import select, update, func
 import restartCodeCache as restartCodeCache
@@ -62,3 +65,21 @@ class UserService:
             return "Something gone wrong. Password has not been updated", 400
 
         return "Password should contain at least one uppercase and one special character", 400
+
+    def login(self, email: str, password: str):
+        try:
+            query = select(User).where(User.email == email).where(User.password == password)
+            result = db_session.execute(query).one()
+            if result is not None:
+                return 'Zalogowany', 200
+
+            return 'Nieprawidłowy login lub hasło', 401
+
+        except(Exception) as error:
+            print(error)
+
+        return 'Nieprawidłowy login lub hasło', 401
+
+    def logout(self):
+        logout_user()
+        return redirect(url_for('/'))
