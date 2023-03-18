@@ -2,6 +2,7 @@ import random
 
 from flask import jsonify
 
+from userDiseaseHistoryJPA import UserDiseaseHistory
 from dbConnection import db_session
 from sqlalchemy import select, update, func
 import restartCodeCache as restartCodeCache
@@ -67,14 +68,21 @@ class UserService:
 
         return "Password should contain at least one uppercase and one special character", 400
 
-
-    def test(self ):
+    def saveUserHistory(self, userId: int, userSymptoms: [], disease: str):
         try:
-            query= select(Diseases)
-            result = db_session.scalars(query).fetchall()
-            return result
-        except(Exception) as error:
-            print(error)
-            return "error"
+            symptoms = ""
+            for msg in userSymptoms:
+                symptoms += msg
 
-        return "dupa"
+            query = select(Diseases).where(Diseases.choroba == disease)
+            diseaseJPA = db_session.scalars(query).one()
+
+            history = UserDiseaseHistory(user_id=userId, user_symptoms=symptoms, disease=diseaseJPA)
+            db_session.add(history)
+            db_session.commit()
+            return "Done :)"
+
+        except(Exception) as error:
+            print("Error while saving user history: ", error)
+
+        return "Gówno"

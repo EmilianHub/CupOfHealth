@@ -29,4 +29,4 @@ def updatePassword():
 
 @user.get("/test")
 def displayTest():
-    return userService.test()
+    return userService.saveUserHistory(1, ["Ból głowy, gorączka"], "Astma")
