@@ -5,6 +5,7 @@ import restartCodeCache as restartCodeCache
 from userJPA import User
 from emailService import EmailService
 import re
+import rsaEncryption
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
@@ -49,13 +50,13 @@ class UserService:
 
     def updatePassword(self, email: str, password: str):
         if passwordRegex.match(str(password)):
+            encryptedPassword = rsaEncryption.encrypt(password)
             try:
-                query = update(User).where(User.email == email).values(password=password)
+                query = update(User).where(User.email == email).values(password=encryptedPassword)
                 result = db_session.execute(query)
                 db_session.commit()
                 if result.rowcount != 0:
                     return "Password updated", 200
-                return "Something gone wrong. Password has not been updated", 400
             except(Exception) as error:
                 print("Error occurred while updating user: ", error)
 
