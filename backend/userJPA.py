@@ -8,7 +8,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(nullable=True, unique=True)
-    password: Mapped[bytes] = mapped_column(nullable=True)
+    password: Mapped[str] = mapped_column(nullable=True)
 
 
 Base.metadata.create_all(engine)

@@ -50,9 +50,8 @@ class UserService:
 
     def updatePassword(self, email: str, password: str):
         if passwordRegex.match(str(password)):
-            encryptedPassword = rsaEncryption.encrypt(password)
             try:
-                query = update(User).where(User.email == email).values(password=encryptedPassword)
+                query = update(User).where(User.email == email).values(password=password)
                 result = db_session.execute(query)
                 db_session.commit()
                 if result.rowcount != 0:
