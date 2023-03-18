@@ -1,10 +1,14 @@
 import random
+
+from flask import jsonify
+
 from dbConnection import db_session
 from sqlalchemy import select, update, func
 import restartCodeCache as restartCodeCache
 from userJPA import User
 from emailService import EmailService
 import re
+from chorobyJPA import Diseases
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
@@ -62,3 +66,15 @@ class UserService:
             return "Something gone wrong. Password has not been updated", 400
 
         return "Password should contain at least one uppercase and one special character", 400
+
+
+    def test(self ):
+        try:
+            query= select(Diseases)
+            result = db_session.scalars(query).fetchall()
+            return result
+        except(Exception) as error:
+            print(error)
+            return "error"
+
+        return "dupa"
