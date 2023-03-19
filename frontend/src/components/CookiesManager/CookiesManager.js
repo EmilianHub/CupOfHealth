@@ -1,6 +1,7 @@
 import Cookies from "universal-cookie";
 let cookie = new Cookies();
 
+
 export function createNewCookie(userId){
     cookie.set("userId", userId);
 }
