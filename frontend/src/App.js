@@ -19,7 +19,7 @@ function App() {
               <Route path="/register" element={<RegisterPage/>}/>
               <Route path="/remind" element={<RemindPassPage/>}/>
               <Route path="/verify" element={<VerifyPage/>}/>
-
+              <Route path="/logout" element={<Logout/>}/>
            </Routes>
         </Router>
       </div>

@@ -1,13 +1,13 @@
 import random
-
-from flask_login import logout_user
-from flask import Flask, redirect, url_for
-from dbConnection import db_session
-from sqlalchemy import select, update, func
-import restartCodeCache as restartCodeCache
-from userJPA import User
-from emailService import EmailService
 import re
+from flask import redirect, url_for
+from flask_login import logout_user
+from sqlalchemy import select, update, func
+
+import restartCodeCache as restartCodeCache
+from dbConnection import db_session
+from emailService import EmailService
+from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
@@ -83,3 +83,13 @@ class UserService:
     def logout(self):
         logout_user()
         return redirect(url_for('/'))
+
+    def __init__(self, id, email, password):
+        self.id = id
+        self.email = email
+        self.password = password
+
+    def get_user_by_email(email):
+
+        return User(1, 'test@example.com', 'pbkdf2:sha256:150000$z2QbohmE$48d9f3f58484f01ec62e51785f29e1d24b1b7f2a0a69d7c9ac1283f052c7530f')
+

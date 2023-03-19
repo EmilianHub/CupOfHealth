@@ -8,9 +8,9 @@ export default function Logout(){
     let navigate = useNavigate();
     useEffect(()=>{
         deleteCookies()
-                navigate("/");
-                window.location.reload(false)
-    }, [])
+        navigate("/");
+        window.location.reload(false)
+    }, )
     return(
         <div></div>
         // <Sidebar/>

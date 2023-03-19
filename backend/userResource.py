@@ -1,9 +1,9 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect, url_for, render_template, session
 from userService import UserService
 
 user = Blueprint("user", __name__)
 
-userService = UserService()
+userService = UserService(2,"koz_17@wp.pl","12345")
 
 
 @user.post("/send_code")
