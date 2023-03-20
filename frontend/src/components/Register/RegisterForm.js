@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {Link, useNavigate} from "react-router-dom";
-import axios from "axios";
+import axios, {HttpStatusCode} from "axios";
 import "./RegisterForm.css"
 
 const Login = () => {
@@ -8,18 +8,24 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     function subForm() {
-        axios.post("http://localhost:5000/register", null, {
-                params: {email, password}
-            }
+        axios.post("http://localhost:5000/user/register",{
+            email:email , password:password}
+
         ).then((response) => {
-            console.log(response.data)
-            if (response.data === 0) {
-                window.alert(("złe dane"))
-            } else {
-                navigate("/")
-                window.location.reload(false)
-            }
+
+            if (response.status === HttpStatusCode.Ok )
+            {navigate("/");
+                window.location.reload();}
+            window.alert (`Uzytkownik zarejsertowany.`)
+
         })
+            .catch((error) => {
+                if(
+                    error.response.status === HttpStatusCode.Unauthorized
+                )
+                    window.alert("złe dane rejestracyjne");
+                console.log(error);
+            });
     }
 
     return (

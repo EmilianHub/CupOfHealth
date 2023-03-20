@@ -26,3 +26,10 @@ def updatePassword():
     email = args.get("email")
     password = args.get("password")
     return userService.updatePassword(email, password)
+
+@user.post("/register")
+def register():
+    args = request.get_json()
+    email = args.get("email")
+    password = args.get("password")
+    return userService.register(email, password)

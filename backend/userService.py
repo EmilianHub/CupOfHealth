@@ -1,13 +1,18 @@
 import random
 from dbConnection import db_session
-from sqlalchemy import select, update, func
+from sqlalchemy import select, update, func,insert
 import restartCodeCache as restartCodeCache
 from userJPA import User
 from emailService import EmailService
 import re
+import hashlib
+from werkzeug.security import generate_password_hash, check_password_hash
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
+password = "password".encode()
+d = hashlib.sha256(password)
+hash = d.digest()
 
 class UserService:
     # That makes the class Singleton
@@ -50,7 +55,7 @@ class UserService:
     def updatePassword(self, email: str, password: str):
         if passwordRegex.match(str(password)):
             try:
-                query = update(User).where(User.email == email).values(password=password)
+                query = update(User).where(User.email == email).values(password=hash)
                 result = db_session.execute(query)
                 db_session.commit()
                 if result.rowcount != 0:
@@ -62,3 +67,19 @@ class UserService:
             return "Something gone wrong. Password has not been updated", 400
 
         return "Password should contain at least one uppercase and one special character", 400
+
+
+    def register (self, email: str,password:str):
+
+        try:
+            newUser=User(email=email,password=hash)
+            result = db_session.add(newUser)
+            db_session.commit()
+            return "zarejestrowano", 200
+
+        except(Exception) as error:
+            print(error)
+
+        return 'złe dane do rejestracyji ', 401
+
+
