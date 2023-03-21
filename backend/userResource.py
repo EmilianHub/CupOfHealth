@@ -26,7 +26,3 @@ def updatePassword():
     email = args.get("email")
     password = args.get("password")
     return userService.updatePassword(email, password)
-
-@user.get("/test")
-def displayTest():
-    return userService.test()
