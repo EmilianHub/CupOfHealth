@@ -9,6 +9,7 @@ import restartCodeCache as restartCodeCache
 from userJPA import User
 from emailService import EmailService
 import re
+import rsaEncryption
 from chorobyJPA import Diseases
 
 emailService = EmailService()
@@ -60,7 +61,6 @@ class UserService:
                 db_session.commit()
                 if result.rowcount != 0:
                     return "Password updated", 200
-                return "Something gone wrong. Password has not been updated", 400
             except(Exception) as error:
                 print("Error occurred while updating user: ", error)
 
