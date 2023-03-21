@@ -1,4 +1,5 @@
 import random
+from userDiseaseHistoryJPA import UserDiseaseHistory
 from dbConnection import db_session
 from sqlalchemy import select, update, func
 import restartCodeCache as restartCodeCache
@@ -6,6 +7,7 @@ from userJPA import User
 from emailService import EmailService
 import re
 import rsaEncryption
+from chorobyJPA import Diseases
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
@@ -62,3 +64,23 @@ class UserService:
             return "Something gone wrong. Password has not been updated", 400
 
         return "Password should contain at least one uppercase and one special character", 400
+
+    def saveDiseaseHistory(self, userId: int, userSymptoms: [], disease: str):
+        try:
+            symptoms = ""
+            for msg in userSymptoms:
+                symptoms += msg
+
+            encryptedSymptoms = rsaEncryption.encrypt(symptoms)
+            query = select(Diseases).where(Diseases.choroba == disease)
+            diseaseJPA = db_session.scalars(query).one()
+
+            history = UserDiseaseHistory(user_id=userId, user_symptoms=encryptedSymptoms, disease=diseaseJPA)
+            db_session.add(history)
+            db_session.commit()
+            return "History saved", 200
+
+        except(Exception) as error:
+            print("Error while saving user history: ", error)
+
+        return "Something gone wrong", 400
