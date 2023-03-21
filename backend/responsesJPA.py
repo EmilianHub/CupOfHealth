@@ -13,7 +13,7 @@ from sqlalchemy import ForeignKey
 association_table = Table(
     "patterns_responses",
     Base.metadata,
-    Column("pettern_id", ForeignKey("chatbot_patterns.id"), primary_key=True),
+    Column("pattern_id", ForeignKey("chatbot_patterns.id"), primary_key=True),
     Column("response_id", ForeignKey("chatbot_responses.id"), primary_key=True),
 )
 
