@@ -14,7 +14,7 @@ class UserDiseaseHistory(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
-    user_symptoms: Mapped[str] = mapped_column(unique=False, nullable=False)
+    user_symptoms: Mapped[bytes] = mapped_column(unique=False, nullable=False)
     disease_id: Mapped[int] = mapped_column(ForeignKey(Diseases.id_choroba))
     disease: Mapped[Diseases] = relationship()
 
