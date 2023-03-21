@@ -51,9 +51,7 @@ if __name__ == '__main__':
 
 
 def get_user_by_email(email):
-    return User(1, 'test@example.com', 'pbkdf2:sha256:150000$z2QbohmE$48d9f3f58484f01ec62e51785f29e1d24b1b7f2a0a69d7c9ac1283f052c7530f')
-
-
+    return User.query.filter_by(email=email).first()
 
 @app.route('/sign_in', methods=['GET', 'POST'])
 def login():
@@ -63,69 +61,31 @@ def login():
         email = request.form['email']
         password = request.form['password']
         user = get_user_by_email(email)
-        user_jpa = User()
-        user_service = UserService(user_jpa)
-        user = user_service.find_user_by_username(user)
-        if verify_user(email, password):
-            token = generate_token(email)
+        if user and check_password_hash(user.password, password):
+            token = generate_token(user.username)
             return jsonify({'token': token.decode('UTF-8')})
         else:
             return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('/'))
-            flash('Nieprawidłowy adres e-mail lub hasło')
-        else:
-
-            session['Zalogowany'] = True
-            session['username'] = user
-            return redirect(url_for('index'))
     else:
         if 'Zalogowany' in session:
-
-            return redirect(url_for('index'))
+            return redirect(url_for('/'))
         else:
             return render_template('/sign_in')
 
-@app.before_request
-def check_user_logged_in():
-    # sprawdź, czy użytkownik jest zalogowany
-    if request.endpoint != 'login' and not session.get('Zalogowany'):
-        return redirect(url_for('login'))
+@app.route('/')
+@login_required
+def index():
+    return 'Witaj, {}!'.format(current_user.username)
 
 def generate_token(username):
     # generowanie tokena JWT
     token = jwt.encode({'username': username}, SECRET_KEY, algorithm='HS256')
     return token
 
-@app.route('/')
-def index():
-    # strona główna aplikacji, którą może zobaczyć tylko zalogowany użytkownik
-    return 'Witaj, {}!'.format(session['username'])
-
-@app.route('/user', methods=['GET'])
-@login_required
-def uuu():
-
-    return render_template('/user')
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    return redirect(url_for("/"))
-
-def verify_user(email, password):
-    user = User.query.filter_by(email=email).first()
-    if user and check_password_hash(user.password, password):
-        return True
-    else:
-        return False
-
-def generate_token(username):
-    # generowanie tokena JWT
-    token = jwt.encode({'username': email}, SECRET_KEY, algorithm='HS256')
-    return token
+@app.route('/protected')
+#@token_required
+def protected():
+    return jsonify({'message': 'Token JWT czuwa.'}), 200
 
 def token_required(f):
     @wraps(f)
@@ -137,10 +97,4 @@ def token_required(f):
             data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         except:
             return jsonify({'error': 'Nieprawidłowy token'}), 401
-        return f(*args, **kwargs)
-    return decorated
-
-@app.route('/protected')
-@token_required
-def protected():
-    return jsonify({'message': 'Token JWT czuwa.'})
+        return f(*args)

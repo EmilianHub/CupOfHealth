@@ -4,11 +4,22 @@ import "./SignInForm.css"
 import {useNavigate} from "react-router-dom";
 import { Link } from 'react-router-dom';
 import {createNewCookie} from "../CookiesManager/CookiesManager";
+import jwt from "jwt-decode";
 
 export default function SignInForm(){
     let navigate = useNavigate();
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+
+    function generateToken(userData) {
+        const user = {
+            email: userData.email,
+            password: userData.password
+        };
+        const token = jwt.sign(user, 'SECRET', { expiresIn: 1800 }); //pol sekundy
+
+        localStorage.setItem('token', token);
+    }
 
     function subForm() {
         axios.post("http://localhost:5000/user/sign_in",
@@ -20,9 +31,13 @@ export default function SignInForm(){
                 createNewCookie(4)
                 navigate("/");
                 window.location.reload();
+
+                const userData = {
+                    email: email,
+                    password: password
+                };
+                generateToken(userData);
             }
-            // const token = response.data.token;
-            // localStorage.setItem("token", token);
 
         })
             .catch((error) => {
@@ -33,6 +48,7 @@ export default function SignInForm(){
                 console.log(error);
             });
     }
+
 
     return(
 

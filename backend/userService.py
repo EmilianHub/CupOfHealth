@@ -89,7 +89,8 @@ class UserService:
         self.email = email
         self.password = password
 
-    def get_user_by_email(email):
-
-        return User(1, 'test@example.com', 'pbkdf2:sha256:150000$z2QbohmE$48d9f3f58484f01ec62e51785f29e1d24b1b7f2a0a69d7c9ac1283f052c7530f')
+    def find_user_by_username(self):
+        query = select(User).where(User.email == self.email)
+        result = db_session.execute(query).one_or_none()
+        return result
 
