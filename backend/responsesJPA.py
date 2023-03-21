@@ -29,7 +29,7 @@ class Responses(Base):
     pattern: Mapped[List[Patterns]] = relationship(secondary=association_table)
 
     def __repr__(self) -> str:
-        return f"Responses(id={self.id!r}, choroba={self.response!r}, objawy={self.response_group!r}, pattern={self.pattern!r})"
+        return f"Responses(id={self.id!r}, response={self.response!r}, response_group={self.response_group!r}, pattern={self.pattern!r})"
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
