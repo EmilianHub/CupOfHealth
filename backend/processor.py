@@ -1,4 +1,5 @@
 import operator
+from math import ceil
 
 import nltk
 from nltk.stem import WordNetLemmatizer
@@ -66,37 +67,35 @@ def getResponse(ints, msg):
 
     for i in list_of_intents:
         if i['tag'] == tag:
-            result = random.choice(i['responses'])
-            break
+            return random.choice(i['responses'])
 
     return retrieveDisesaseResponse(tag, msg)
 
 
 def retrieveDisesaseResponse(tag, msg):
     list_of_disease_intents = disease_intents['intents']
-    diseaseCache.add(msg)
+    diseaseCache.addToMsgCache(msg)
 
     for i in list_of_disease_intents:
         if i['tag'] == tag:
             patterns = np.array(i['patterns'])
-            if compareWithPatterns(patterns):
-                saveUserDiseaseHistory(diseaseCache.user_msg, tag)
-                return random.choice(i['responses'])
+            if compareWithPatterns(patterns, msg, tag):
+                # saveUserDiseaseHistory(diseaseCache.user_msg, tag)
+                return random.choice(i['responses']).format(tag)
         else:
             return random.choice(list_of_disease_intents[len(list_of_disease_intents) - 1]['responses'])
 
 
-def compareWithPatterns(patterns):
-    matching = []
+def compareWithPatterns(patterns, msg, tag):
+    splitedMessage = set(msg.split())
+    for p in patterns:
+        splitedPattern = set(p.split())
+        matches = len(splitedPattern.intersection(splitedMessage))
+        if matches >= ceil(len(splitedPattern)/2):
+            diseaseCache.addToMatchingCache(msg, tag)
+            break
 
-    for m in set(diseaseCache.user_msg):
-        splitedMessage = m.split(" ")
-        for p in patterns:
-            splitedPattern = p.split()
-            matches = len(splitedPattern.intersection(splitedMessage))
-            if matches == len(splitedPattern):
-                matching.append(splitedMessage)
-    if len(matching) / len(patterns) >= 0.5:
+    if len(diseaseCache.getMatchingWithTag(tag)) / len(patterns) >= 0.5:
         return True
     return False
 
