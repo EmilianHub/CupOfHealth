@@ -1,3 +1,5 @@
+import operator
+
 import nltk
 from nltk.stem import WordNetLemmatizer
 import json
@@ -61,28 +63,42 @@ def getResponse(ints, msg):
     result = "Ask the right question"
     tag = ints[0]['intent']
     list_of_intents = intents['intents']
-    list_of_disease_intents = disease_intents['intents']
+
     for i in list_of_intents:
         if i['tag'] == tag:
             result = random.choice(i['responses'])
             break
 
+    return retrieveDisesaseResponse(tag, msg)
+
+
+def retrieveDisesaseResponse(tag, msg):
+    list_of_disease_intents = disease_intents['intents']
     diseaseCache.add(msg)
-    matching = []
 
     for i in list_of_disease_intents:
         if i['tag'] == tag:
             patterns = np.array(i['patterns'])
-            for m in set(diseaseCache.user_msg):
-                string = list(filter(lambda r: r.lower() == m.lower(), patterns))
-                if len(string) > 0:
-                    matching.append(string.pop())
-            if len(matching) / len(patterns) >= 0.5:
+            if compareWithPatterns(patterns):
                 saveUserDiseaseHistory(diseaseCache.user_msg, tag)
                 return random.choice(i['responses'])
-            else:
-                return random.choice(list_of_disease_intents[len(list_of_disease_intents) - 1]['responses'])
-    return result
+        else:
+            return random.choice(list_of_disease_intents[len(list_of_disease_intents) - 1]['responses'])
+
+
+def compareWithPatterns(patterns):
+    matching = []
+
+    for m in set(diseaseCache.user_msg):
+        splitedMessage = m.split(" ")
+        for p in patterns:
+            splitedPattern = p.split()
+            matches = len(splitedPattern.intersection(splitedMessage))
+            if matches == len(splitedPattern):
+                matching.append(splitedMessage)
+    if len(matching) / len(patterns) >= 0.5:
+        return True
+    return False
 
 
 def chatbot_response(msg):
