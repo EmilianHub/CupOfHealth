@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 import { Link } from 'react-router-dom';
 import {createNewCookie} from "../CookiesManager/CookiesManager";
 import jwt from "jwt-decode";
+import CryptoJS from 'crypto-js';
 
 export default function SignInForm(){
     let navigate = useNavigate();
@@ -21,9 +22,11 @@ export default function SignInForm(){
         localStorage.setItem('token', token);
     }
 
+
     function subForm() {
+        const password_hased=CryptoJS.SHA256(password).toString();
         axios.post("http://localhost:5000/user/sign_in",
-            {email:email, password:password}
+            {email:email, password:password_hased}
 
         ).then((response) => {
             if (response.status === HttpStatusCode.Ok )

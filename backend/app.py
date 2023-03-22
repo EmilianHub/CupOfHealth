@@ -1,4 +1,5 @@
 import email
+import hashlib
 
 import flash as flash
 import password as password
@@ -61,7 +62,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
         user = get_user_by_email(email)
-        if user and check_password_hash(user.password, password):
+        if user and hashlib.sha256(password.encode('utf-8')).hexdigest() == user.password:
             token = generate_token(user.username)
             return jsonify({'token': token.decode('UTF-8')})
         else:
