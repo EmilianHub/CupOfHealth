@@ -1,10 +1,12 @@
 import random
 from dbConnection import db_session
-from sqlalchemy import select, update, func,insert
+from sqlalchemy import select, update, func
 import restartCodeCache as restartCodeCache
 from userJPA import User
 from emailService import EmailService
 import re
+from flask import redirect, url_for
+from flask_login import logout_user
 import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -83,4 +85,33 @@ class UserService:
 
         return 'złe dane do rejestracyji ', 401
 
+
+
+    def login(self, email: str, password: str):
+        try:
+            query = select(User).where(User.email == email).where(User.password == password)
+            result = db_session.execute(query).one()
+            if result is not None:
+                return 'Zalogowany', 200
+
+            return 'Nieprawidłowy login lub hasło', 401
+
+        except(Exception) as error:
+            print(error)
+
+        return 'Nieprawidłowy login lub hasło', 401
+
+    def logout(self):
+        logout_user()
+        return redirect(url_for('/'))
+
+    def __init__(self, id, email, password):
+        self.id = id
+        self.email = email
+        self.password = password
+
+    def find_user_by_username(self):
+        query = select(User).where(User.email == self.email)
+        result = db_session.execute(query).one_or_none()
+        return result
 

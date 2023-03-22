@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect, url_for, render_template, session
 from userService import UserService
 
 user = Blueprint("user", __name__)
@@ -33,3 +33,15 @@ def register():
     email = args.get("email")
     password = args.get("password")
     return userService.register(email, password)
+
+
+@user.post("/sign_in")
+def SignIn():
+    args = request.get_json()
+    email = args.get("email")
+    password = args.get("password")
+    return userService.login(email, password)
+
+@user.post("/logout")
+def LogOut():
+    return userService.logout()

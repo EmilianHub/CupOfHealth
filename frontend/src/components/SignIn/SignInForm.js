@@ -1,27 +1,57 @@
 import React,{ useState } from "react";
-import axios from "axios";
+import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
-import {useNavigate} from "react-router-dom";import { Link } from 'react-router-dom';
-
+import {useNavigate} from "react-router-dom";
+import { Link } from 'react-router-dom';
+import {createNewCookie} from "../CookiesManager/CookiesManager";
+import jwt from "jwt-decode";
+import CryptoJS from 'crypto-js';
 
 export default function SignInForm(){
     let navigate = useNavigate();
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
-    function subForm() {
-        axios.post("http://localhost:5000/sign_in", null, {
-                params: {email, password}
-            }
-        ).then((response) => {
-            console.log(response.data)
-            if (response.data === 0) {
-                window.alert(("złe dane"))
-            } else {
-                navigate("/")
-                window.location.reload(false)
-            }
-        })
+
+    function generateToken(userData) {
+        const user = {
+            email: userData.email,
+            password: userData.password
+        };
+        const token = jwt.sign(user, 'SECRET', { expiresIn: 1800 }); //pol sekundy
+
+        localStorage.setItem('token', token);
     }
+
+
+    function subForm() {
+        const password_hased=CryptoJS.SHA256(password).toString();
+        axios.post("http://localhost:5000/user/sign_in",
+            {email:email, password:password_hased}
+
+        ).then((response) => {
+            if (response.status === HttpStatusCode.Ok )
+            {
+                createNewCookie(4)
+                navigate("/");
+                window.location.reload();
+
+                const userData = {
+                    email: email,
+                    password: password
+                };
+                generateToken(userData);
+            }
+
+        })
+            .catch((error) => {
+                if(
+                    error.response.status === HttpStatusCode.Unauthorized
+                )
+                    window.alert("Nieprawidłowy login lub hasło");
+                console.log(error);
+            });
+    }
+
 
     return(
 
