@@ -10,9 +10,9 @@ const Navbar = () => {
 
 
     useEffect(() => {
-        const userId = readCookie();
-        console.log(userId)
-        if (userId !== undefined) {
+        const token = localStorage.getItem("token")
+        console.log(token)
+        if (token !== null) {
             setNavBar(NavBarDataUser)
         } else {
             setNavBar(NavBarData)

@@ -3,7 +3,7 @@ import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
 import {useNavigate} from "react-router-dom";
 import { Link } from 'react-router-dom';
-import {createNewCookie} from "../CookiesManager/CookiesManager";
+import {createNewCookie, getToken} from "../CookiesManager/CookiesManager";
 import jwt from "jwt-decode";
 import CryptoJS from 'crypto-js';
 
@@ -12,43 +12,28 @@ export default function SignInForm(){
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
 
-    function generateToken(userData) {
-        const user = {
-            email: userData.email,
-            password: userData.password
-        };
-        const token = jwt.sign(user, 'SECRET', { expiresIn: 1800 }); //pol sekundy
-
-        localStorage.setItem('token', token);
-    }
-
 
     function subForm() {
-        const password_hased=CryptoJS.SHA256(password).toString();
         axios.post("http://localhost:5000/user/sign_in",
-            {email:email, password:password_hased}
+            {
+                email: email,
+                password: password
+            }, getToken()
 
         ).then((response) => {
+            console.log(response.status)
             if (response.status === HttpStatusCode.Ok )
             {
-                createNewCookie(4)
+                localStorage.setItem('token', response.data.token);
                 navigate("/");
                 window.location.reload();
-
-                const userData = {
-                    email: email,
-                    password: password
-                };
-                generateToken(userData);
             }
 
-        })
-            .catch((error) => {
-                if(
-                    error.response.status === HttpStatusCode.Unauthorized
-                )
-                    window.alert("Nieprawidłowy login lub hasło");
-                console.log(error);
+        }).catch((error) => {
+            if(error.response.status === HttpStatusCode.Unauthorized){
+                window.alert("Nie poprawny login i hasło")
+            }
+            console.log(error)
             });
     }
 

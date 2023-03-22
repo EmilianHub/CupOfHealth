@@ -7,7 +7,7 @@ export default function Logout(){
 
     let navigate = useNavigate();
     useEffect(()=>{
-        deleteCookies()
+        localStorage.clear()
         navigate("/");
         window.location.reload(false)
     }, )

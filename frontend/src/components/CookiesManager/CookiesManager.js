@@ -14,3 +14,8 @@ export function readCookie(){
 export function deleteCookies(){
     return cookie.remove("userId")
 }
+
+export function getToken(){
+    const token = localStorage.getItem("token")
+    return {"Authorization": token}
+}

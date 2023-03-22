@@ -1,4 +1,6 @@
 import {readCookie} from "../CookiesManager/CookiesManager";
+import jwt from "jwt-decode";
+import jwtDecode from "jwt-decode";
 
 export const NavBarData = [
     {
@@ -17,7 +19,14 @@ export const NavBarData = [
     }
     ];
 
-const uzytkownik = readCookie()
+function getUserEmail(){
+    const token = localStorage.getItem("token")
+    if (token !== null) {
+        console.log(jwtDecode(token))
+        let tokenDecoded = jwtDecode(token)
+        return tokenDecoded.email
+    }
+}
 
 export const NavBarDataUser = [
     {
@@ -26,7 +35,7 @@ export const NavBarDataUser = [
         link: "/"
     },
     {
-      name: uzytkownik,
+      name: getUserEmail(),
     },
     {
         name: "Wyloguj",
