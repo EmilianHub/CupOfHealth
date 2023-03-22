@@ -6,12 +6,18 @@ import re
 import jwt
 from flask import redirect, url_for
 from flask_login import logout_user
+from userDiseaseHistoryJPA import UserDiseaseHistory
+from dbConnection import db_session
 from sqlalchemy import select, update, func
 
 import restartCodeCache as restartCodeCache
 from dbConnection import db_session
 from emailService import EmailService
 from userJPA import User
+from emailService import EmailService
+import re
+import rsaEncryption
+from chorobyJPA import Diseases
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
@@ -63,7 +69,6 @@ class UserService:
                 db_session.commit()
                 if result.rowcount != 0:
                     return "Password updated", 200
-                return "Something gone wrong. Password has not been updated", 400
             except(Exception) as error:
                 print("Error occurred while updating user: ", error)
 
@@ -115,3 +120,23 @@ class UserService:
         if result is None:
             return False
         return True
+
+    def saveDiseaseHistory(self, userId: int, userSymptoms: [], disease: str):
+        try:
+            symptoms = ""
+            for msg in userSymptoms:
+                symptoms += msg
+
+            encryptedSymptoms = rsaEncryption.encrypt(symptoms)
+            query = select(Diseases).where(Diseases.choroba == disease)
+            diseaseJPA = db_session.scalars(query).one()
+
+            history = UserDiseaseHistory(user_id=userId, user_symptoms=encryptedSymptoms, disease=diseaseJPA)
+            db_session.add(history)
+            db_session.commit()
+            return "History saved", 200
+
+        except(Exception) as error:
+            print("Error while saving user history: ", error)
+
+        return "Something gone wrong", 400

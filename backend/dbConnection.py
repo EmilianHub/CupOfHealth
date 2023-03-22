@@ -12,7 +12,7 @@ db_password = os.getenv("PASSWORD")
 db_port = os.getenv("PORT")
 db_host = os.getenv("HOST")
 
-engine = sqlalchemy.create_engine(f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}", echo=True)
+engine = sqlalchemy.create_engine(f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}", echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
