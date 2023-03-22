@@ -4,20 +4,15 @@ import random
 import re
 
 import jwt
-from flask import redirect, url_for
-from flask_login import logout_user
-from userDiseaseHistoryJPA import UserDiseaseHistory
-from dbConnection import db_session
 from sqlalchemy import select, update, func
 
 import restartCodeCache as restartCodeCache
-from dbConnection import db_session
-from emailService import EmailService
-from userJPA import User
-from emailService import EmailService
-import re
 import rsaEncryption
 from chorobyJPA import Diseases
+from dbConnection import db_session
+from emailService import EmailService
+from userDiseaseHistoryJPA import UserDiseaseHistory
+from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
