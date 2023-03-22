@@ -10,9 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-password = "password".encode()
-d = hashlib.sha256(password)
-hash = d.digest()
+
 
 class UserService:
     # That makes the class Singleton
@@ -72,6 +70,9 @@ class UserService:
     def register (self, email: str,password:str):
 
         try:
+            d = hashlib.sha256(password)
+            hash = d.digest()
+
             newUser=User(email=email,password=hash)
             result = db_session.add(newUser)
             db_session.commit()
