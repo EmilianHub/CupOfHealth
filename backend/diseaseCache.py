@@ -1,5 +1,20 @@
+
 user_msg = []
+matching = {}
 
 
-def add(msg):
+def addToMsgCache(msg):
     user_msg.append(msg)
+
+
+def addToMatchingCache(msg, tag):
+    value = matching.get(tag)
+    if value is not None:
+        value += [msg]
+        matching[tag] = value
+    else:
+        matching[tag] = [msg]
+
+
+def getMatchingWithTag(tag):
+    return matching.get(tag)

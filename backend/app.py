@@ -6,19 +6,19 @@ from flask_login import LoginManager
 import processor
 from locationResource import location
 from userResource import user
+import rsaEncryption
 
 app = Flask(__name__)
+rsaEncryption.saveToFile()
 app.config['SECRET_KEY'] = 'enter-a-very-secretive-key-3479373'
 app.register_blueprint(user, url_prefix="/user")
 app.register_blueprint(location, url_prefix="/location")
 CORS(app)
-LoginManager(app)
 
 
 @app.route('/', methods=["GET", "POST"])
 def index():
     return render_template('index.html', **locals())
-
 
 
 @app.route('/chatbot', methods=["GET", "POST"])
