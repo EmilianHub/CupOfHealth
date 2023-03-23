@@ -83,4 +83,18 @@ class UserService:
 
         return 'złe dane do rejestracyji ', 401
 
+    def editemail(self, email: str, newemail: str):
+
+            try:
+                query = update(User).where(User.email == email).values(email=newemail)
+                result = db_session.execute(query)
+                db_session.commit()
+                if result.rowcount != 0:
+                    return "emial updated", 200
+                return "Something gone wrong. emial has not been updated", 400
+            except(Exception) as error:
+                print("Error occurred while updating user: ", error)
+
+            return "Something gone wrong. email has not been updated", 400
+
 

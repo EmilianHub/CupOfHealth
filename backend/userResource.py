@@ -33,3 +33,10 @@ def register():
     email = args.get("email")
     password = args.get("password")
     return userService.register(email, password)
+@user.post("/edit_email")
+def edit_email():
+    args = request.get_json()
+    email = args.get("email")
+    newemail = args.get("newemail")
+    return userService.editemail(email,newemail)
+

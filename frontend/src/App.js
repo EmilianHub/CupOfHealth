@@ -5,6 +5,7 @@ import RegisterPage from "./pages/RegisterPage"
 import RemindPassPage from "./pages/RemindPassPage";
 import VerifyPage from "./pages/VerifyPage";
 import SignInPage from "./pages/SignInPage";
+import EditUserPage from "./pages/EditUserPage";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
               <Route path="/register" element={<RegisterPage/>}/>
               <Route path="/remind" element={<RemindPassPage/>}/>
               <Route path="/verify" element={<VerifyPage/>}/>
+              <Route path="/edituser" element={<EditUserPage/>}/>
            </Routes>
         </Router>
       </div>
