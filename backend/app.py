@@ -1,15 +1,18 @@
-from flask import Flask, render_template, jsonify, request
-from userResource import user
-from locationResource import location
+from flask import Flask, jsonify, request
+from flask import render_template
 from flask_cors import CORS
+from flask_login import LoginManager
+
 import processor
+from locationResource import location
+from userResource import user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'enter-a-very-secretive-key-3479373'
 app.register_blueprint(user, url_prefix="/user")
 app.register_blueprint(location, url_prefix="/location")
 CORS(app)
-
+LoginManager(app)
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -27,6 +30,7 @@ def chatbotResponse():
         response = processor.chatbot_response(the_question)
 
     return jsonify({"response": response })
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

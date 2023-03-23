@@ -1,27 +1,42 @@
 import React,{ useState } from "react";
-import axios from "axios";
+import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
-import {useNavigate} from "react-router-dom";import { Link } from 'react-router-dom';
-
+import {useNavigate} from "react-router-dom";
+import { Link } from 'react-router-dom';
+import {createNewCookie, getToken} from "../CookiesManager/CookiesManager";
+import jwt from "jwt-decode";
+import CryptoJS from 'crypto-js';
 
 export default function SignInForm(){
     let navigate = useNavigate();
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+
+
     function subForm() {
-        axios.post("http://localhost:5000/sign_in", null, {
-                params: {email, password}
-            }
+        axios.post("http://localhost:5000/user/sign_in",
+            {
+                email: email,
+                password: password
+            }, getToken()
+
         ).then((response) => {
-            console.log(response.data)
-            if (response.data === 0) {
-                window.alert(("złe dane"))
-            } else {
-                navigate("/")
-                window.location.reload(false)
+            console.log(response.status)
+            if (response.status === HttpStatusCode.Ok )
+            {
+                localStorage.setItem('token', response.data.token);
+                navigate("/");
+                window.location.reload();
             }
-        })
+
+        }).catch((error) => {
+            if(error.response.status === HttpStatusCode.Unauthorized){
+                window.alert("Nie poprawny login i hasło")
+            }
+            console.log(error)
+            });
     }
+
 
     return(
 

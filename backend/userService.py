@@ -1,16 +1,21 @@
-import random
-from dbConnection import db_session
-from sqlalchemy import select, update, func,insert
-import restartCodeCache as restartCodeCache
-from userJPA import User
-from emailService import EmailService
-import re
+import datetime
 import hashlib
-from werkzeug.security import generate_password_hash, check_password_hash
+import random
+import re
+
+import jwt
+from flask import redirect, url_for
+from flask_login import logout_user
+from sqlalchemy import select, update, func
+
+import restartCodeCache as restartCodeCache
+from dbConnection import db_session
+from emailService import EmailService
+from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-
+SECRET_KEY = 'secret'
 
 class UserService:
     # That makes the class Singleton
@@ -66,14 +71,13 @@ class UserService:
 
         return "Password should contain at least one uppercase and one special character", 400
 
-
-    def register (self, email: str,password:str):
+    def register (self, email: str, password: str):
 
         try:
-            d = hashlib.sha256(password)
-            hash = d.digest()
+            d = hashlib.sha256(password.encode())
+            hash = d.hexdigest()
 
-            newUser=User(email=email,password=hash)
+            newUser=User(email=email, password=hash)
             result = db_session.add(newUser)
             db_session.commit()
             return "zarejestrowano", 200
@@ -97,4 +101,31 @@ class UserService:
 
             return "Something gone wrong. email has not been updated", 400
 
+    def login(self, email: str, password: str):
+        try:
+            query = select(User).where(User.email == email).where(User.password == password)
+            result = db_session.execute(query).one()
+            if result is not None:
+                return 'Zalogowany', 200
 
+            return 'Nieprawidłowy login lub hasło', 401
+
+        except(Exception) as error:
+            print(error)
+
+        return 'Nieprawidłowy login lub hasło', 401
+
+    def get_user_by_email(self, email):
+        return User.query.filter_by(email=email).first()
+
+    def generate_token(self, email):
+        # generowanie tokena JWT
+        token = jwt.encode({'email': email, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, SECRET_KEY, algorithm='HS256')
+        return token
+
+    def decodeToken(self, token):
+        data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+        result = self.get_user_by_email(data.get("email"))
+        if result is None:
+            return False
+        return True
