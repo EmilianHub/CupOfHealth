@@ -18,15 +18,10 @@ nltk.download('punkt')
 nltk.download('wordnet')
 lemmatizer = WordNetLemmatizer()
 
-
 words = []
 classes = []
 documents = []
 ignore_words = ['?', '!']
-data_file = open('job_intents.json', encoding='utf-8').read()
-disease_file = open('disease_intents.json', encoding='utf-8').read()
-intents = json.loads(data_file)
-disease_intents = json.loads(disease_file)
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 groupedCasualPatterns = defaultdict(list)
@@ -44,6 +39,9 @@ for k, v in groupedCasualPatterns.items():
 
         if k not in classes:
             classes.append(k)
+
+#TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
+
 
 # for dIntents in disease_intents['intents']:
 #     for pattern in dIntents['patterns']:
