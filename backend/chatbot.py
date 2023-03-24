@@ -10,6 +10,7 @@ import random
 from sqlalchemy import select
 from patternsJPA import Patterns
 from responsesJPA import Responses
+from chorobyJPA import Diseases
 from dbConnection import db_session
 from collections import defaultdict
 import pdb
@@ -24,6 +25,7 @@ documents = []
 ignore_words = ['?', '!']
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
+casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 groupedCasualPatterns = defaultdict(list)
 
 for i in casualPatterns:
@@ -41,7 +43,17 @@ for k, v in groupedCasualPatterns.items():
             classes.append(k)
 
 #TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
+for i in casualDiseases:
+    w = nltk.word_tokenize(pattern)
+    words.extend(w)
 
+    documents.append((w, i.objawy))
+
+    if i not in classes:
+        classes.append(i)
+
+#    i.choroba
+#       i.objawy
 
 # for dIntents in disease_intents['intents']:
 #     for pattern in dIntents['patterns']:
