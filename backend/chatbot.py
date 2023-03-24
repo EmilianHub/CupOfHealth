@@ -41,7 +41,9 @@ for k, v in groupedCasualPatterns.items():
             classes.append(k)
 
 #TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
-
+# for i in result:
+#    i.choroba
+#       i.objawy
 
 # for dIntents in disease_intents['intents']:
 #     for pattern in dIntents['patterns']:
