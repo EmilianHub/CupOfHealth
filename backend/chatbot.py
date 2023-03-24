@@ -53,7 +53,7 @@ for i in casualDiseases:
         classes.append(i)
 
 #    i.choroba
-#       i.objawy
+#       i.objawyy
 
 # for dIntents in disease_intents['intents']:
 #     for pattern in dIntents['patterns']:
