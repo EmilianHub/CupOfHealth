@@ -21,15 +21,17 @@ def index():
     return render_template('index.html', **locals())
 
 
-@app.route('/chatbot', methods=["GET", "POST"])
+@app.post('/chatbot')
 def chatbotResponse():
 
-    if request.method == 'POST':
-        the_question = request.form['question']
-
+    #if request.method == 'POST':
+        arg = request.get_json()
+        the_question = arg.get("question")
+        #the_question = request.form['question']
+        #
         response = processor.chatbot_response(the_question)
 
-    return jsonify({"response": response })
+        return jsonify({"response": response })
 
 
 if __name__ == '__main__':
