@@ -24,6 +24,11 @@ export default function Chat() {
         })
         console.log(data)
     }
+    const pressEnter = (e) => {
+        if(e.keyCode === 13){
+           sendMessage();
+        }
+    };
 
 
 
@@ -47,7 +52,7 @@ export default function Chat() {
                     </div>
                 ))}</div>
                 <div className="chat-input">
-                    <input id={"message"} autoComplete={"on"} type="text" placeholder="Wpisz wiadomość..." onChange={(v) => {setQuestion(v.target.value)}}/>
+                    <input id={"message"} onKeyPress={pressEnter} autoComplete={"on"} onKeyDown={(e) => pressEnter(e)} type="text" placeholder="Wpisz wiadomość..." onChange={(v) => {setQuestion(v.target.value)}}/>
                     <button id={"send"}  onClick={sendMessage}>Wyślij</button>
                 </div>
             </div>
