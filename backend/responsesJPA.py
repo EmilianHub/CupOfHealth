@@ -1,14 +1,17 @@
 from dataclasses import dataclass
+from typing import List
 
-from patternsJPA import Patterns
-from dbConnection import engine, Base
-from sqlalchemy.orm import Mapped, synonym
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import Table
+from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from typing import List
-from sqlalchemy import Column
-from sqlalchemy import Table
-from sqlalchemy import ForeignKey
+from sqlalchemy import Enum
+
+from tagGroup import TagGroup
+from dbConnection import engine, Base
+from patternsJPA import Patterns
 
 association_table = Table(
     "patterns_responses",
@@ -24,7 +27,7 @@ class Responses(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     response: Mapped[str] = mapped_column(nullable=True)
-    response_group: Mapped[str] = mapped_column(nullable=True)
+    response_group = Column(Enum(TagGroup, name="tag_group"))
 
     pattern: Mapped[List[Patterns]] = relationship(secondary=association_table)
 

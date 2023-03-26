@@ -1,7 +1,7 @@
 {
   "intents": [
     {
-      "tag": "gryp",
+      "tag": "grypa",
       "patterns": [
         "Jest mi zimno",
         "Mam dreszcze",
@@ -10,7 +10,7 @@
         "Boli mnie gardło"
       ],
       "responses": [
-        "Twoje objawy mogą wskazywać na różne choroby. Podaj ich więcej, abym mógł ocenić to dokładniej"
+        "Twoje objawy mogą wskazywać na {}. Podaj ich więcej, abym mógł ocenić to dokładniej"
       ]
     },
     {
