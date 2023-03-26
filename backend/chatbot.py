@@ -1,19 +1,19 @@
-import nltk
-import json
 import pickle
-from nltk.stem import WordNetLemmatizer
-import numpy as np
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout
-from keras.optimizers import SGD
 import random
+from collections import defaultdict
+
+import nltk
+import numpy as np
+from keras.layers import Dense, Dropout
+from keras.models import Sequential
+from keras.optimizers import SGD
+from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
-from patternsJPA import Patterns
-from responsesJPA import Responses
+
 from chorobyJPA import Diseases
 from dbConnection import db_session
-from collections import defaultdict
-import pdb
+from patternsJPA import Patterns
 
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -22,7 +22,7 @@ lemmatizer = WordNetLemmatizer()
 words = []
 classes = []
 documents = []
-ignore_words = ['?', '!']
+ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam"]
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
@@ -34,28 +34,30 @@ for i in casualPatterns:
 for k, v in groupedCasualPatterns.items():
     for pattern in v:
 
-        w = nltk.word_tokenize(pattern)
+        w = nltk.word_tokenize(str(pattern))
         words.extend(w)
 
-        documents.append((w, k))
+        documents.append((w, str(k)))
 
         if k not in classes:
-            classes.append(k)
+            classes.append(str(k))
 
 #TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
 for i in casualDiseases:
     for j in i.objawy:
-        w = nltk.word_tokenize(j.objawy)
+        w = nltk.word_tokenize(str(j.objawy))
         words.extend(w)
 
-        documents.append((w, i.choroba))
+        documents.append((w, str(i.choroba)))
 
         if i not in classes:
-            classes.append(i.choroba)
+            classes.append(str(i.choroba))
+
+words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
+words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]
+words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in ignore_words]
 
 
-
-words = [lemmatizer.lemmatize(w.lower()) for w in words if w not in ignore_words]
 words = sorted(list(set(words)))
 
 classes = sorted(list(set(classes)))
