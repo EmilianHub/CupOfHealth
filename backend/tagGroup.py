@@ -2,17 +2,17 @@ import enum
 
 
 class TagGroup(enum.Enum):
-    DISEASE = "disease"
-    WELCOME = "welcome"
-    QUESTION = "question"
-    GOODBYE = "goodbye"
-    THANKS = "thanks"
-    NOANSWER = "noanswer"
-    NAME = "name"
-    MOOD = "mood"
-    SPECIFY = "specify"
-    FEW_QUESTIONS = "few_questions"
-
+    disease = "disease"
+    welcome = "welcome"
+    question = "question"
+    goodbye = "goodbye"
+    thanks = "thanks"
+    noanswer = "noanswer"
+    name = "name"
+    mood = "mood"
+    specify = "specify"
+    few_question = "few_questions"
+#
     @staticmethod
     def fetch_names():
         return [c.value for c in TagGroup]
