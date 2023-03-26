@@ -1,7 +1,20 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { Link } from 'react-router-dom';
 import "./Chat.css"
+import axios from "axios";
 export default function Chat() {
+    const [question, setQuestion] = useState("")
+
+    function sendMessage() {
+        axios.post("https://localhost:5000/chatbot", {
+            question: question
+        }).then((response) => {
+            console.log(response)
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
     return (
         <body>
         <div className='container'>
@@ -18,8 +31,8 @@ export default function Chat() {
                     -Podaj profilaktyke dla [nazwa choroby]
                 </div>
                 <div className="chat-input">
-                    <input type="text" placeholder="Rozpocznij czat..." />
-                    <button>Wyślij</button>
+                    <input type="text" placeholder="Rozpocznij czat..." onChange={(v) => {setQuestion(v.target.value)}}/>
+                    <button onClick={sendMessage}>Wyślij</button>
                 </div>
             </div>
         </div>

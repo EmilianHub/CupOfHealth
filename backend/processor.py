@@ -1,19 +1,21 @@
-import nltk
-from nltk.stem import WordNetLemmatizer
-import json
-import random
-import diseaseCache
 import pickle
+import random
+
+import nltk
 import numpy as np
 from keras.models import load_model
+from nltk.stem import WordNetLemmatizer
+from sqlalchemy import select
 
+import diseaseCache
+from chorobyJPA import Diseases
+from dbConnection import db_session
+from responsesJPA import Responses
+from tagGroup import TagGroup
 from userService import UserService
 
 lemmatizer = WordNetLemmatizer()
 model = load_model('chatbot_model.h5')
-
-intents = json.loads(open('job_intents.json', encoding='utf-8').read())
-disease_intents = json.loads(open('disease_intents.json', encoding='utf-8').read())
 words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
@@ -22,7 +24,7 @@ userService = UserService()
 def clean_up_sentence(sentence):
     sentence_words = nltk.word_tokenize(sentence)
     sentence_words = [lemmatizer.lemmatize(word.lower()) for word in sentence_words]
-    return sentence_words
+    return set(sentence_words)
 
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
@@ -47,7 +49,7 @@ def predict_class(sentence, model):
     # filter out predictions below a threshold
     p = bow(sentence, words, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.25
+    ERROR_THRESHOLD = 0.06
     results = [[i, r] for i, r in enumerate(res) if r > ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -58,31 +60,85 @@ def predict_class(sentence, model):
 
 
 def getResponse(ints, msg):
-    result = "Ask the right question"
     tag = ints[0]['intent']
-    list_of_intents = intents['intents']
-    list_of_disease_intents = disease_intents['intents']
-    for i in list_of_intents:
-        if i['tag'] == tag:
-            result = random.choice(i['responses'])
-            break
 
-    diseaseCache.add(msg)
-    matching = []
+    if isCasualResponse(tag):
+        return retrieveCausalResponse(tag)
 
-    for i in list_of_disease_intents:
-        if i['tag'] == tag:
-            patterns = np.array(i['patterns'])
-            for m in set(diseaseCache.user_msg):
-                string = list(filter(lambda r: r.lower() == m.lower(), patterns))
-                if len(string) > 0:
-                    matching.append(string.pop())
-            if len(matching) / len(patterns) >= 0.5:
-                saveUserDiseaseHistory(diseaseCache.user_msg, tag)
-                return random.choice(i['responses'])
-            else:
-                return random.choice(list_of_disease_intents[len(list_of_disease_intents) - 1]['responses'])
-    return result
+    return retrieveDisesaseResponse(ints, msg)
+
+
+def isCasualResponse(tag):
+    pFilter = filter(lambda t: t == tag, TagGroup.fetch_names())
+
+    return len(list(pFilter)) != 0
+
+
+def retrieveCausalResponse(tag):
+    query = select(Responses.response).select_from(Responses).where(Responses.response_group == tag)
+    response = db_session.scalars(query).fetchall()
+
+    if response is not None:
+        return random.choice(response)
+
+    return "Przepraszam nie mam na to odpowiedzi"
+
+
+def retrieveDisesaseResponse(ints, msg):
+    diseaseCache.addToMsgCache(msg)
+
+    for i in ints:
+        diseaseCache.addToMatchingCache(msg, i['intent'])
+
+    return retrieveDiseaseResponse(msg)
+
+
+def retrieveDiseaseResponse(msg):
+    occurrences = diseaseCache.calculateOccurrences()
+
+    if occurrences is not None:
+        confidence = calculateConfidence(occurrences)
+        confidenceKey = next(iter(confidence))
+        confidenceVaule = confidence.get(confidenceKey)
+
+        response = getResponseWithConfidance(confidenceKey, confidenceVaule, msg)
+        randomResponse = random.choice(response)
+        if randomResponse.startswith("Czy"):
+            return randomResponse.format(msg)
+
+        return randomResponse.format(confidenceKey)
+
+
+    return "Jeszcze nie wiem, wybacz"
+
+
+def getResponseWithConfidance(confidenceKey, confidenceVaule, msg):
+    if confidenceVaule >= 0.6:
+        #saveUserDiseaseHistory(confidenceKey)
+        return findResponseWithTagGroup(TagGroup.disease.value)
+    elif 0.6 > confidenceVaule > 0.3:
+        #saveUserDiseaseHistory(confidenceKey)
+        return findResponseWithTagGroup(TagGroup.question.value)
+
+    return findResponseWithTagGroup(TagGroup.few_question.value)
+
+
+def findResponseWithTagGroup(group):
+    responseQuery = select(Responses.response).select_from(Responses).where(Responses.response_group == group)
+    return db_session.scalars(responseQuery).fetchall()
+
+
+def calculateConfidence(occurrences):
+    confidence = {}
+    for k, v in occurrences.items():
+        pDiseaseQuery = select(Diseases).where(Diseases.choroba.ilike(k.lower()))
+        symptomsAmount = db_session.scalars(pDiseaseQuery).one_or_none()
+        if symptomsAmount is None:
+            confidence[k] = 0
+        else:
+            confidence[k] = v/len(symptomsAmount.objawy)
+
+    return dict(sorted(confidence.items(), key=lambda item: item[1], reverse=True))
 
 
 def chatbot_response(msg):
@@ -91,7 +147,8 @@ def chatbot_response(msg):
     return res
 
 
-def saveUserDiseaseHistory(userMsg: [], disease: str):
+def saveUserDiseaseHistory(disease: str):
     # TODO: Pobieranie id użytkownika z tokena
     userId = 1
+    userMsg = diseaseCache.user_msg
     return userService.saveDiseaseHistory(userId, userMsg, disease)
