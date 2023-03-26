@@ -3,16 +3,25 @@ import { Link } from 'react-router-dom';
 import "./Chat.css"
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import jwt from "jwt-encode";
+import jwtDecode from "jwt-decode";
 export default function Chat() {
     const [question, setQuestion] = useState("")
     const [data, setData] = useState([])
     const navigate = useNavigate();
+    const secret = 'secret';
 
     console.log(data)
     function sendMessage() {
         data.push({"user": question})
-        axios.post("http://localhost:5000/chatbot", {
+        const Json = {
             question: question
+        }
+        const Encrypt = jwt(Json,secret)
+        console.log(Encrypt)
+        console.log(jwtDecode(Encrypt,secret))
+        axios.post("http://localhost:5000/chatbot", {
+            question: Encrypt
         }).then((response) => {
             data.push(response.data)
             console.log(response)
@@ -32,6 +41,7 @@ export default function Chat() {
 
 
 
+
     return (
         <body>
         <div className='container'>
@@ -47,7 +57,7 @@ export default function Chat() {
                 <div className="chatbot">
                 {data.map((k, v) => (
                     <div  key={v}>
-                        <p> -{k.user} {k.response}</p>
+                        <p> -{k.user}{k.response}</p>
                         <p></p>
                     </div>
                 ))}</div>

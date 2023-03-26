@@ -116,6 +116,9 @@ class UserService:
             return False
         return True
 
+    def Decode(self,token):
+        return jwt.decode(token, SECRET_KEY, algorithms='HS256')
+
     def saveDiseaseHistory(self, userId: int, userSymptoms: [], disease: str):
         try:
             symptoms = ""

@@ -1,9 +1,12 @@
 from flask import Flask, jsonify, request
 from flask import render_template
 from flask_cors import CORS
-from flask_login import LoginManager
+
 
 import processor
+from userService import UserService
+
+userService = UserService()
 from locationResource import location
 from userResource import user
 import rsaEncryption
@@ -24,12 +27,13 @@ def index():
 @app.post('/chatbot')
 def chatbotResponse():
 
-    #if request.method == 'POST':
+
         arg = request.get_json()
         the_question = arg.get("question")
-        #the_question = request.form['question']
-        #
-        response = processor.chatbot_response(the_question)
+        q = userService.Decode(the_question)
+        print(q)
+        q.get("question")
+        response = processor.chatbot_response(q.get("question"))
 
         return jsonify({"response": response })
 
