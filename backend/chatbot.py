@@ -51,7 +51,7 @@ for i in casualDiseases:
     documents.append((w, i.choroba))
 
     if i not in classes:
-     classes.append(i)
+     classes.append(i.choroba)
 
 
 
