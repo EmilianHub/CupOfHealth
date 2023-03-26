@@ -29,7 +29,7 @@ casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 groupedCasualPatterns = defaultdict(list)
 
 for i in casualPatterns:
-    groupedCasualPatterns[i.pattern_group].append(i.pattern)
+    groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
 
 for k, v in groupedCasualPatterns.items():
     for pattern in v:
@@ -48,10 +48,10 @@ for i in casualDiseases:
         w = nltk.word_tokenize(j.objawy)
         words.extend(w)
 
-    documents.append((w, i.choroba))
+        documents.append((w, i.choroba))
 
-    if i not in classes:
-     classes.append(i.choroba)
+        if i not in classes:
+            classes.append(i.choroba)
 
 
 

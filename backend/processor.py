@@ -108,12 +108,12 @@ def retrieveDiseaseResponse():
 def getResponseWithConfidance(confidenceKey, confidenceVaule):
     if confidenceVaule >= 0.5:
         #saveUserDiseaseHistory(confidenceKey)
-        return findResponseWithTagGroup(TagGroup.DISEASE.value)
+        return findResponseWithTagGroup(TagGroup.disease.value)
     elif 0.5 > confidenceVaule > 0.3:
         #saveUserDiseaseHistory(confidenceKey)
-        return findResponseWithTagGroup(TagGroup.QUESTION.value)
+        return findResponseWithTagGroup(TagGroup.question.value)
 
-    return findResponseWithTagGroup(TagGroup.FEW_QUESTIONS.value)
+    return findResponseWithTagGroup(TagGroup.few_question.value)
 
 
 def findResponseWithTagGroup(group):
