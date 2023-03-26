@@ -17,7 +17,7 @@ class Loca(Base):
     miasto: Mapped[str] = mapped_column(nullable=True)
     choroba_id: Mapped[int] = mapped_column(ForeignKey(Diseases.id_choroba))
     choroba: Mapped[Diseases] = relationship()
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id),nullable=True)
     user: Mapped[User] = relationship()
 
 Base.metadata.create_all(engine)
