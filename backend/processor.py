@@ -82,8 +82,9 @@ def retrieveDisesaseResponse(tag, msg):
             if compareWithPatterns(patterns, msg, tag):
                 # saveUserDiseaseHistory(diseaseCache.user_msg, tag)
                 return random.choice(i['responses']).format(tag)
-        else:
-            return random.choice(list_of_disease_intents[len(list_of_disease_intents) - 1]['responses'])
+            else:
+                return random.choice(list_of_disease_intents[len(list_of_disease_intents) - 1]['responses'])
+    return "Przepraszam możesz powtórzyć"
 
 
 def compareWithPatterns(patterns, msg, tag):

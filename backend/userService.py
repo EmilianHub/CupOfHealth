@@ -1,6 +1,9 @@
 import datetime
 import hashlib
 import random
+
+from locJPA import Loca
+from locationService import getCurrentLocation
 from userDiseaseHistoryJPA import UserDiseaseHistory
 from dbConnection import db_session
 import re
@@ -153,3 +156,25 @@ class UserService:
             print("Error while saving user history: ", error)
 
         return "Something gone wrong", 400
+
+
+    def saveLocalization(self,latitude: str, longitude: str,choroba: str, email: str ):
+        try:
+            location=getCurrentLocation(longitude,latitude)
+            query = select(Diseases).where(Diseases.choroba == choroba)
+            diseaseJPA = db_session.scalars(query).one()
+            querya = select(User).where(User.email==email)
+            userJPA = db_session.scalars(querya).one_or_none()
+            locJPA=Loca(woj=location["address"]["state"], miasto=location["address"]["city"],choroba=diseaseJPA,user=userJPA)
+            db_session.add(locJPA)
+            db_session.commit()
+            return "dziala"
+        except(Exception) as error:
+            print(error)
+        return "niedziała"
+
+
+
+
+
+

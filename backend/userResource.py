@@ -82,3 +82,12 @@ def token_required(f):
 @token_required
 def protected():
     return jsonify({'message': 'Token JWT czuwa.'}), 200
+
+@user.post('/loca')
+def loca():
+    args = request.get_json()
+    woj = args.get("lat")
+    miasto = args.get("long")
+    choroba = args.get("choroba")
+    email = args.get("email")
+    return userService.saveLocalization(woj, miasto, choroba, email)

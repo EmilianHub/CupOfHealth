@@ -17,4 +17,7 @@ def addToMatchingCache(msg, tag):
 
 
 def getMatchingWithTag(tag):
-    return matching.get(tag)
+    result = matching.get(tag)
+    if result is None:
+        return []
+    return result
