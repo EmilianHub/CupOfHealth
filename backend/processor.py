@@ -65,7 +65,7 @@ def getResponse(ints, msg):
     if isCasualResponse(tag):
         return retrieveCausalResponse(tag)
 
-    return retrieveDisesaseResponse(tag, msg)
+    return retrieveDisesaseResponse(ints, msg)
 
 
 def isCasualResponse(tag):
@@ -84,32 +84,39 @@ def retrieveCausalResponse(tag):
     return "Przepraszam nie mam na to odpowiedzi"
 
 
-def retrieveDisesaseResponse(tag, msg):
+def retrieveDisesaseResponse(ints, msg):
     diseaseCache.addToMsgCache(msg)
-    diseaseCache.addToMatchingCache(msg, tag)
 
-    return retrieveDiseaseResponse()
+    for i in ints:
+        diseaseCache.addToMatchingCache(msg, i['intent'])
+
+    return retrieveDiseaseResponse(msg)
 
 
-def retrieveDiseaseResponse():
+def retrieveDiseaseResponse(msg):
     occurrences = diseaseCache.calculateOccurrences()
 
     if occurrences is not None:
         confidence = calculateConfidence(occurrences)
         confidenceKey = next(iter(confidence))
         confidenceVaule = confidence.get(confidenceKey)
-        response = getResponseWithConfidance(confidenceKey, confidenceVaule)
 
-        return random.choice(response).format(confidenceKey)
+        response = getResponseWithConfidance(confidenceKey, confidenceVaule, msg)
+        randomResponse = random.choice(response)
+        if randomResponse.startswith("Czy"):
+            return randomResponse.format(msg)
+
+        return randomResponse.format(confidenceKey)
+
 
     return "Jeszcze nie wiem, wybacz"
 
 
-def getResponseWithConfidance(confidenceKey, confidenceVaule):
-    if confidenceVaule >= 0.5:
+def getResponseWithConfidance(confidenceKey, confidenceVaule, msg):
+    if confidenceVaule >= 0.6:
         #saveUserDiseaseHistory(confidenceKey)
         return findResponseWithTagGroup(TagGroup.disease.value)
-    elif 0.5 > confidenceVaule > 0.3:
+    elif 0.6 > confidenceVaule > 0.3:
         #saveUserDiseaseHistory(confidenceKey)
         return findResponseWithTagGroup(TagGroup.question.value)
 
