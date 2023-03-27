@@ -1,45 +1,36 @@
 import React, {useState} from 'react'
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import "./Chat.css"
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
-import jwt from "jwt-encode";
-import jwtDecode from "jwt-decode";
+import {useNavigate} from 'react-router-dom';
+import {decodeJwt, jwtEncode} from "../JwtManager/JwtManager";
+
 export default function Chat() {
     const [question, setQuestion] = useState("")
     const [data, setData] = useState([])
     const navigate = useNavigate();
-    const secret = 'secret';
 
-    console.log(data)
     function sendMessage() {
         data.push({"user": question})
-        const Json = {
+        const json = {
             question: question
         }
-        const Encrypt = jwt(Json,secret)
-        console.log(Encrypt)
-        console.log(jwtDecode(Encrypt,secret))
-        axios.post("http://localhost:5000/chatbot", {
-            question: Encrypt
-        }).then((response) => {
-            data.push(response.data)
-            console.log(response)
-            navigate('/',{replace:true})
-            document.getElementById('message').value='';
+        axios.post("http://localhost:5000/chatbot", jwtEncode(json))
+            .then((response) => {
+                data.push(decodeJwt(response.data))
+                navigate('/', {replace: true})
+                document.getElementById('message').value = '';
 
-        }).catch((error) => {
+            }).catch((error) => {
             console.log(error)
         })
-        console.log(data)
     }
+
     const pressEnter = (e) => {
-        if(e.keyCode === 13){
-           sendMessage();
+        if (e.keyCode === 13) {
+            sendMessage();
         }
     };
-
-
 
 
     return (
@@ -48,22 +39,31 @@ export default function Chat() {
             <div className="chat-window">
                 <h2>CupOf Health</h2>
                 <h4>Twoje zdrowie jest dla nas najważniejsze!</h4>
-                <div className="info">Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link to="/sign_in">Zaloguj się</Link><br/>
+                <div className="info">Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
+                    to="/sign_in">Zaloguj się</Link><br/>
                     lub <Link to="/register">Utwórz konto</Link>
-                </div><br/>
+                </div>
+                <br/>
                 <div className="chat-messages">
 
                 </div>
                 <div className="chatbot">
-                {data.map((k, v) => (
-                    <div  key={v}>
-                        <p> -{k.user}{k.response}</p>
-                        <p></p>
-                    </div>
-                ))}</div>
+                    {data.map((k, v) => (
+                        <div key={v}>
+                            <p> -{k.user}{k.response}</p>
+                            <p></p>
+                        </div>
+                    ))}</div>
                 <div className="chat-input">
-                    <input id={"message"} onKeyPress={pressEnter} autoComplete={"on"} onKeyDown={(e) => pressEnter(e)} type="text" placeholder="Wpisz wiadomość..." onChange={(v) => {setQuestion(v.target.value)}}/>
-                    <button id={"send"}  onClick={sendMessage}>Wyślij</button>
+                    <input id={"message"}
+                           autoComplete={"on"}
+                           onKeyDown={(e) => pressEnter(e)}
+                           type="text"
+                           placeholder="Wpisz wiadomość..."
+                           onChange={(v) => {
+                               setQuestion(v.target.value)
+                           }}/>
+                    <button id={"send"} onClick={sendMessage}>Wyślij</button>
                 </div>
             </div>
         </div>

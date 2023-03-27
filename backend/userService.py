@@ -1,22 +1,21 @@
-import datetime
 import hashlib
 import random
 import re
 
-import jwt
-from sqlalchemy import select, update, func
+from sqlalchemy import select, update
 
 import restartCodeCache as restartCodeCache
 import rsaEncryption
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from emailService import EmailService
+from jwtService import decodeRequest
 from userDiseaseHistoryJPA import UserDiseaseHistory
 from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-SECRET_KEY = 'secret'
+
 
 class UserService:
     # That makes the class Singleton
@@ -42,9 +41,8 @@ class UserService:
 
     def __isUserExist(self, email: str):
         try:
-            query = select(func.count("*")).select_from(User).where(User.email == email)
-            result = db_session.execute(query).one()
-            return result.count != 0
+            result = self.getUserWithEmail(email)
+            return result is not None
         except(Exception) as error:
             print("Error occurred while looking for user: ", error)
 
@@ -71,13 +69,13 @@ class UserService:
 
         return "Password should contain at least one uppercase and one special character", 400
 
-    def register (self, email: str, password: str):
+    def register(self, email: str, password: str):
 
         try:
             d = hashlib.sha256(password.encode())
             hash = d.hexdigest()
 
-            newUser=User(email=email, password=hash)
+            newUser = User(email=email, password=hash)
             result = db_session.add(newUser)
             db_session.commit()
             return "zarejestrowano", 200
@@ -101,23 +99,15 @@ class UserService:
 
         return 'Nieprawidłowy login lub hasło', 401
 
-    def get_user_by_email(self, email):
+    def getUserWithEmail(self, email):
         return User.query.filter_by(email=email).first()
 
-    def generate_token(self, email):
-        # generowanie tokena JWT
-        token = jwt.encode({'email': email, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, SECRET_KEY, algorithm='HS256')
-        return token
-
-    def decodeToken(self, token):
-        data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
-        result = self.get_user_by_email(data.get("email"))
+    def verifyAuthentication(self, token):
+        data = decodeRequest(token)
+        result = self.getUserWithEmail(data.get("email"))
         if result is None:
             return False
         return True
-
-    def Decode(self,token):
-        return jwt.decode(token, SECRET_KEY, algorithms='HS256')
 
     def saveDiseaseHistory(self, userId: int, userSymptoms: [], disease: str):
         try:
