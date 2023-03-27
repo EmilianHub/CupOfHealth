@@ -1,65 +1,75 @@
+import pickle
+import random
+from collections import defaultdict
+
 import nltk
+import numpy as np
+from keras.layers import Dense, Dropout
+from keras.models import Sequential
+from keras.optimizers import SGD
+from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
+from sqlalchemy import select
+
+from chorobyJPA import Diseases
+from dbConnection import db_session
+from patternsJPA import Patterns
+
 nltk.download('punkt')
 nltk.download('wordnet')
-from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
-import json
-import pickle
 
-import numpy as np
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout
-from keras.optimizers import SGD
-import random
-
-words=[]
+words = []
 classes = []
 documents = []
-ignore_words = ['?', '!']
-data_file = open('job_intents.json', encoding='utf-8').read()
-disease_file = open('disease_intents.json', encoding='utf-8').read()
-intents = json.loads(data_file)
-disease_intents = json.loads(disease_file)
+ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam"]
 
+casualPatterns = db_session.scalars(select(Patterns)).fetchall()
+casualDiseases = db_session.scalars(select(Diseases)).fetchall()
+groupedCasualPatterns = defaultdict(list)
 
-for intent in intents['intents']:
-    for pattern in intent['patterns']:
+for i in casualPatterns:
+    groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
 
-        w = nltk.word_tokenize(pattern)
+for k, v in groupedCasualPatterns.items():
+    for pattern in v:
+
+        w = nltk.word_tokenize(str(pattern))
         words.extend(w)
 
-        documents.append((w, intent['tag']))
+        documents.append((w, str(k)))
 
+        if k not in classes:
+            classes.append(str(k))
 
-        if intent['tag'] not in classes:
-            classes.append(intent['tag'])
-
-for dIntents in disease_intents['intents']:
-    for pattern in dIntents['patterns']:
-
-        w = nltk.word_tokenize(pattern)
+#TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
+for i in casualDiseases:
+    for j in i.objawy:
+        w = nltk.word_tokenize(str(j.objawy))
         words.extend(w)
 
-        documents.append((w, dIntents['tag']))
+        documents.append((w, str(i.choroba)))
+
+        if i not in classes:
+            classes.append(str(i.choroba))
+
+words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
+words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]
+words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in ignore_words]
 
 
-        if dIntents['tag'] not in classes:
-            classes.append(dIntents['tag'])
-
-words = [lemmatizer.lemmatize(w.lower()) for w in words if w not in ignore_words]
 words = sorted(list(set(words)))
 
 classes = sorted(list(set(classes)))
 
-print (len(documents), "documents")
+print(len(documents), "documents")
 
-print (len(classes), "classes", classes)
+print(len(classes), "classes", classes)
 
-print (len(words), "unique lemmatized words", words)
+print(len(words), "unique lemmatized words", words)
 
-
-pickle.dump(words,open('words.pkl','wb'))
-pickle.dump(classes,open('classes.pkl','wb'))
+pickle.dump(words, open('words.pkl', 'wb'))
+pickle.dump(classes, open('classes.pkl', 'wb'))
 
 # initializing training data
 training = []
@@ -74,7 +84,6 @@ for doc in documents:
     for w in words:
         bag.append(1) if w in pattern_words else bag.append(0)
 
-
     output_row = list(output_empty)
     output_row[classes.index(doc[1])] = 1
 
@@ -83,10 +92,9 @@ for doc in documents:
 random.shuffle(training)
 training = np.array(training)
 # create train and test lists. X - patterns, Y - intents
-train_x = list(training[:,0])
-train_y = list(training[:,1])
+train_x = list(training[:, 0])
+train_y = list(training[:, 1])
 print("Training data created")
-
 
 # Create model - 3 layers. First layer 128 neurons, second layer 64 neurons and 3rd output layer contains number of neurons
 # equal to number of intents to predict output intent with softmax
@@ -101,7 +109,7 @@ model.add(Dense(len(train_y[0]), activation='softmax'))
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-#fitting and saving the model
+# fitting and saving the model
 hist = model.fit(np.array(train_x), np.array(train_y), epochs=200, batch_size=5, verbose=1)
 model.save('chatbot_model.h5', hist)
 
