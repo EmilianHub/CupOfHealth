@@ -17,6 +17,12 @@ import pdb
 
 nltk.download('punkt')
 nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('tagsets')
+nltk.download('universal_tagset')
+nltk.download('gazetteers')
+nltk.download('stopwords')
+nltk.download('corpora/treebank')
 lemmatizer = WordNetLemmatizer()
 
 words = []
@@ -28,8 +34,9 @@ casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 groupedCasualPatterns = defaultdict(list)
 
+
 for i in casualPatterns:
-    groupedCasualPatterns[i.pattern_group].append(i.pattern)
+    groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
 
 for k, v in groupedCasualPatterns.items():
     for pattern in v:
@@ -48,11 +55,10 @@ for i in casualDiseases:
         w = nltk.word_tokenize(j.objawy)
         words.extend(w)
 
-    documents.append((w, i.choroba))
+        documents.append((w, i.choroba))
 
-    if i not in classes:
-     classes.append(i.choroba)
-
+        if i not in classes:
+            classes.append(i.choroba)
 
 
 words = [lemmatizer.lemmatize(w.lower()) for w in words if w not in ignore_words]
