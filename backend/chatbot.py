@@ -8,6 +8,7 @@ from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
 from nltk.corpus import wordnet as wn
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
 
@@ -17,6 +18,9 @@ from patternsJPA import Patterns
 
 nltk.download('punkt')
 nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('pl196x')
+nltk.download('cess_esp')
 lemmatizer = WordNetLemmatizer()
 
 words = []
@@ -28,6 +32,8 @@ casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 groupedCasualPatterns = defaultdict(list)
 
+
+
 for i in casualPatterns:
     groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
 
@@ -35,6 +41,8 @@ for k, v in groupedCasualPatterns.items():
     for pattern in v:
 
         w = nltk.word_tokenize(str(pattern))
+        stops = set(nltk.corpus.stopwords.w('polish'))
+        w = [word for word in w if word not in stops]
         words.extend(w)
 
         documents.append((w, str(k)))
@@ -46,6 +54,8 @@ for k, v in groupedCasualPatterns.items():
 for i in casualDiseases:
     for j in i.objawy:
         w = nltk.word_tokenize(str(j.objawy))
+        stops = set(nltk.corpus.stopwords.w('polish'))
+        w = [word for word in w if word not in stops]
         words.extend(w)
 
         documents.append((w, str(i.choroba)))
@@ -59,6 +69,7 @@ words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in
 
 
 words = sorted(list(set(words)))
+
 
 classes = sorted(list(set(classes)))
 
