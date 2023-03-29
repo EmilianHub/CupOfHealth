@@ -1,7 +1,8 @@
 import pickle
 import random
 from collections import defaultdict
-
+import spacy
+from spacy.lang.pl.examples import sentences
 import nltk
 import numpy as np
 from keras.layers import Dense, Dropout
@@ -26,7 +27,7 @@ lemmatizer = WordNetLemmatizer()
 words = []
 classes = []
 documents = []
-ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam"]
+ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam", "dla", "w", "o", "z", "pod", "nad"]
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
@@ -41,8 +42,6 @@ for k, v in groupedCasualPatterns.items():
     for pattern in v:
 
         w = nltk.word_tokenize(str(pattern))
-        stops = set(nltk.corpus.stopwords.w('polish'))
-        w = [word for word in w if word not in stops]
         words.extend(w)
 
         documents.append((w, str(k)))
@@ -54,8 +53,6 @@ for k, v in groupedCasualPatterns.items():
 for i in casualDiseases:
     for j in i.objawy:
         w = nltk.word_tokenize(str(j.objawy))
-        stops = set(nltk.corpus.stopwords.w('polish'))
-        w = [word for word in w if word not in stops]
         words.extend(w)
 
         documents.append((w, str(i.choroba)))
@@ -85,10 +82,11 @@ pickle.dump(classes, open('classes.pkl', 'wb'))
 # initializing training data
 training = []
 output_empty = [0] * len(classes)
+nlp = spacy.load("pl_core_news_sm")
+doc = nlp(sentences[0])
 for doc in documents:
 
     bag = []
-
     pattern_words = doc[0]
     pattern_words = [lemmatizer.lemmatize(word.lower()) for word in pattern_words]
 
