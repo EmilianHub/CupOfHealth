@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import "./Chat.css"
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { FaBullseye} from "react-icons/fa";
+import { FaBug} from "react-icons/fa";
 export default function Chat() {
     const [question, setQuestion] = useState("")
     const [data, setData] = useState([])
@@ -46,9 +48,8 @@ export default function Chat() {
                 </div>
                 <div className="chatbot">
                 {data.map((k, v) => (
-                    <div  key={v}>
-                        <p> -{k.user} {k.response}</p>
-                        <p></p>
+                    <div className={"message"} key={v}>
+                        <div className={"userMsg"}>{k.user}</div><div className={"chatMsg"}>{k.response}</div>
                     </div>
                 ))}</div>
                 <div className="chat-input">
