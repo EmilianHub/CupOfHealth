@@ -10,5 +10,4 @@ class User(Base):
     email: Mapped[str] = mapped_column(nullable=True, unique=True)
     password: Mapped[str] = mapped_column(nullable=True)
 
-
 Base.metadata.create_all(engine)

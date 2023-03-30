@@ -14,6 +14,13 @@
           <option value="backend.database.dbConnection.flask_pymongo" />
           <option value="backend.app.flask_migrate" />
           <option value="backend.app.flask_sqlalchemy" />
+          <option value="backend.app.werkzeug" />
+          <option value="backend.app.flask_login" />
+          <option value="backend.app.flask_cors" />
+          <option value="backend.app.flask" />
+          <option value="backend.userService.flask_login" />
+          <option value="backend.userService.flask" />
+          <option value="backend.userService.sqlalchemy" />
         </list>
       </option>
     </inspection_tool>
