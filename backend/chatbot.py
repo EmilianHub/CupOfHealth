@@ -16,6 +16,7 @@ from sqlalchemy import select
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
+from stempel import StempelStemmer
 
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -23,6 +24,7 @@ nltk.download('stopwords')
 nltk.download('pl196x')
 nltk.download('cess_esp')
 lemmatizer = WordNetLemmatizer()
+stemmer = StempelStemmer.polimorf()
 
 words = []
 classes = []
@@ -68,6 +70,7 @@ words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in
 words = sorted(list(set(words)))
 
 
+
 classes = sorted(list(set(classes)))
 
 print(len(documents), "documents")
@@ -84,6 +87,7 @@ training = []
 output_empty = [0] * len(classes)
 nlp = spacy.load("pl_core_news_sm")
 doc = nlp(sentences[0])
+
 for doc in documents:
 
     bag = []
