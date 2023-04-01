@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import jwt
+from flask import request
 
 SECRET_KEY = 'secret'
 
@@ -8,9 +9,16 @@ SECRET_KEY = 'secret'
 def generateToken(email):
     # generowanie tokena JWT
     return jwt.encode({'email': email,
-                       "exp": datetime.utcnow() + timedelta(minutes=30)},
+                       "exp": datetime.now() + timedelta(minutes=30)},
                       SECRET_KEY,
                       algorithm='HS256')
+
+
+def decodeHeaderToken():
+    token = request.headers.get('Authorization')
+    if token:
+        return decodeRequest(token)
+    return None
 
 
 def decodeRequest(token):

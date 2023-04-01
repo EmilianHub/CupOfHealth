@@ -1,6 +1,7 @@
 import hashlib
 import random
 import re
+from datetime import datetime, timedelta
 
 from sqlalchemy import select, update
 
@@ -15,7 +16,7 @@ from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-
+TOKEN_EXPIRATION_OFFSET = 30
 
 class UserService:
     # That makes the class Singleton
@@ -41,7 +42,7 @@ class UserService:
 
     def __isUserExist(self, email: str):
         try:
-            result = self.getUserWithEmail(email)
+            result = self.findUserWithEmail(email)
             return result is not None
         except(Exception) as error:
             print("Error occurred while looking for user: ", error)
@@ -99,32 +100,47 @@ class UserService:
 
         return 'Nieprawidłowy login lub hasło', 401
 
-    def getUserWithEmail(self, email):
+    def findUserWithEmail(self, email):
         return User.query.filter_by(email=email).first()
 
     def verifyAuthentication(self, token):
         data = decodeRequest(token)
-        result = self.getUserWithEmail(data.get("email"))
+        result = self.findUserWithEmail(data.get("email"))
         if result is None:
             return False
         return True
 
-    def saveDiseaseHistory(self, userId: int, userSymptoms: [], disease: str):
+    def saveDiseaseHistory(self, userSymptoms: [], disease: str, token):
         try:
             symptoms = ""
             for msg in userSymptoms:
                 symptoms += msg
 
             encryptedSymptoms = rsaEncryption.encrypt(symptoms)
-            query = select(Diseases).where(Diseases.choroba == disease)
-            diseaseJPA = db_session.scalars(query).one()
+            diseaseJPA = self.findDiseaseReferance(disease)
+            userJPA = self.findUserWithEmail(token.get("email"))
+            self.mergeHistory(encryptedSymptoms, diseaseJPA, userJPA, token)
 
-            history = UserDiseaseHistory(user_id=userId, user_symptoms=encryptedSymptoms, disease=diseaseJPA)
-            db_session.add(history)
-            db_session.commit()
             return "History saved", 200
 
         except(Exception) as error:
             print("Error while saving user history: ", error)
 
         return "Something gone wrong", 400
+
+    def findDiseaseReferance(self, disease: str):
+        query = select(Diseases).where(Diseases.choroba == disease)
+        return db_session.scalars(query).one()
+
+    def mergeHistory(self, symtoms, diseaseJPA, userJPA, token):
+        exp = datetime.fromtimestamp(token.get("exp"))
+        query = select(UserDiseaseHistory)\
+            .where(UserDiseaseHistory.user_id == userJPA.id)\
+            .where(UserDiseaseHistory.created + timedelta(minutes=TOKEN_EXPIRATION_OFFSET) >= exp)
+        historyJPA = db_session.scalars(query).one_or_none()
+        newHistoryJPA = UserDiseaseHistory(user=userJPA, user_symptoms=symtoms, disease=diseaseJPA)
+        if historyJPA:
+            newHistoryJPA.id = historyJPA.id
+
+        db_session.merge(newHistoryJPA)
+        db_session.commit()
