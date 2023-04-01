@@ -3,6 +3,7 @@ from functools import wraps
 
 from flask import Blueprint, request, jsonify
 
+import jwtService
 from jwtService import generateToken
 from userService import UserService
 
@@ -44,9 +45,10 @@ def register():
 
 @user.post("/sign_in")
 def login():
-    args = request.get_json()
-    email = args.get('email')
-    password = args.get('password')
+    args = request.get_data()
+    req = jwtService.decodeRequest(args)
+    email = req.get('email')
+    password = req.get('password')
     user = userService.findUserWithEmail(email)
     if hashlib.sha256(password.encode('utf-8')).hexdigest() == user.password:
         token = generateToken(user.email)

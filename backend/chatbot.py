@@ -42,7 +42,7 @@ for k, v in groupedCasualPatterns.items():
         if k not in classes:
             classes.append(str(k))
 
-#TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
+
 for i in casualDiseases:
     for j in i.objawy:
         w = nltk.word_tokenize(str(j.objawy))

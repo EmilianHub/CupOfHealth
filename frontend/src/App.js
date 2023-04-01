@@ -7,6 +7,7 @@ import VerifyPage from "./pages/VerifyPage";
 import SignInPage from "./pages/SignInPage";
 import Navbar from "./components/NavBar/NavBar";
 import Logout from "./components/SignIn/Logout";
+import AuthVerify from "./components/JwtManager/AuthVerification";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
               <Route path="/verify" element={<VerifyPage/>}/>
               <Route path="/logout" element={<Logout/>}/>
            </Routes>
+            <AuthVerify/>
         </Router>
       </div>
   );
