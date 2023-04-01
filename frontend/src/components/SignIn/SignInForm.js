@@ -22,8 +22,9 @@ export default function SignInForm() {
                 localStorage.setItem('token', response.data.token);
                 navigate("/");
                 window.location.reload();
+            } else if (response.status === HttpStatusCode.Unauthorized) {
+                window.alert("Nie poprawny login lub hasło")
             }
-
         }).catch((error) => {
             if (error.response.status === HttpStatusCode.Unauthorized) {
                 window.alert("Nie poprawny login i hasło")

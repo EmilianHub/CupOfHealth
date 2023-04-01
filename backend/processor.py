@@ -1,5 +1,6 @@
 import pickle
 import random
+from math import ceil
 
 import nltk
 import numpy as np
@@ -79,11 +80,12 @@ def isCasualResponse(tag):
 
 
 def retrieveCausalResponse(tag):
-    query = select(Responses.response).select_from(Responses).where(Responses.response_group == tag)
-    response = db_session.scalars(query).fetchall()
+    response = findResponseWithTagGroup(tag)
 
     if response is not None:
-        return random.choice(response)
+        choice = random.choice(response)
+        diseaseCache.assignReponseMessageId(choice.id)
+        return choice.response
 
     return "Przepraszam nie mam na to odpowiedzi"
 
@@ -107,10 +109,9 @@ def retrieveDiseaseResponse(msg):
 
         response = getResponseWithConfidance(confidenceKey, confidenceVaule)
         randomResponse = random.choice(response)
-        if randomResponse.startswith("Czy"):
-            return randomResponse.format(msg)
+        diseaseCache.assignReponseMessageId(randomResponse.id)
 
-        return randomResponse.format(confidenceKey)
+        return randomResponse.response.format(confidenceKey, f"{ceil(confidenceVaule*100)}%")
 
     return "Jeszcze nie wiem, wybacz"
 
@@ -118,16 +119,17 @@ def retrieveDiseaseResponse(msg):
 def getResponseWithConfidance(confidenceKey, confidenceVaule):
     if confidenceVaule >= 0.6:
         saveUserDiseaseHistory(confidenceKey)
-        return findResponseWithTagGroup(TagGroup.disease.value)
+        return findResponseWithTagGroup(TagGroup.disease)
     elif 0.6 > confidenceVaule > 0.3:
         saveUserDiseaseHistory(confidenceKey)
-        return findResponseWithTagGroup(TagGroup.question.value)
+        return findResponseWithTagGroup(TagGroup.question)
 
-    return findResponseWithTagGroup(TagGroup.few_question.value)
+    return findResponseWithTagGroup(TagGroup.few_questions)
 
 
 def findResponseWithTagGroup(group):
-    responseQuery = select(Responses.response).select_from(Responses).where(Responses.response_group == group)
+    responseQuery = select(Responses).where(Responses.response_group == group)\
+        .where(Responses.id != diseaseCache.previousResponseId)
     return db_session.scalars(responseQuery).fetchall()
 
 
