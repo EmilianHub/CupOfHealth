@@ -13,6 +13,7 @@ from dbConnection import db_session
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
+from jwtService import decodeHeaderToken
 
 lemmatizer = WordNetLemmatizer()
 model = load_model('chatbot_model.h5')
@@ -60,12 +61,15 @@ def predict_class(sentence, model):
 
 
 def getResponse(ints, msg):
-    tag = ints[0]['intent']
+    if len(ints) != 0:
+        tag = ints[0]['intent']
 
-    if isCasualResponse(tag):
-        return retrieveCausalResponse(tag)
+        if isCasualResponse(tag):
+            return retrieveCausalResponse(tag)
 
-    return retrieveDisesaseResponse(ints, msg)
+        return retrieveDisesaseResponse(ints, msg)
+
+    return "Na obecną chwilę nie mam na to odpowiedzi, przepraszam"
 
 
 def isCasualResponse(tag):
@@ -101,23 +105,22 @@ def retrieveDiseaseResponse(msg):
         confidenceKey = next(iter(confidence))
         confidenceVaule = confidence.get(confidenceKey)
 
-        response = getResponseWithConfidance(confidenceKey, confidenceVaule, msg)
+        response = getResponseWithConfidance(confidenceKey, confidenceVaule)
         randomResponse = random.choice(response)
         if randomResponse.startswith("Czy"):
             return randomResponse.format(msg)
 
         return randomResponse.format(confidenceKey)
 
-
     return "Jeszcze nie wiem, wybacz"
 
 
-def getResponseWithConfidance(confidenceKey, confidenceVaule, msg):
+def getResponseWithConfidance(confidenceKey, confidenceVaule):
     if confidenceVaule >= 0.6:
-        #saveUserDiseaseHistory(confidenceKey)
+        saveUserDiseaseHistory(confidenceKey)
         return findResponseWithTagGroup(TagGroup.disease.value)
     elif 0.6 > confidenceVaule > 0.3:
-        #saveUserDiseaseHistory(confidenceKey)
+        saveUserDiseaseHistory(confidenceKey)
         return findResponseWithTagGroup(TagGroup.question.value)
 
     return findResponseWithTagGroup(TagGroup.few_question.value)
@@ -141,6 +144,7 @@ def calculateConfidence(occurrences):
     return dict(sorted(confidence.items(), key=lambda item: item[1], reverse=True))
 
 
+
 def chatbot_response(msg):
     ints = predict_class(msg, model)
     res = getResponse(ints, msg)
@@ -148,7 +152,8 @@ def chatbot_response(msg):
 
 
 def saveUserDiseaseHistory(disease: str):
-    # TODO: Pobieranie id użytkownika z tokena
-    userId = 1
-    userMsg = diseaseCache.user_msg
-    return userService.saveDiseaseHistory(userId, userMsg, disease)
+    token = decodeHeaderToken()
+    if token:
+        userMsg = diseaseCache.user_msg
+        return userService.saveDiseaseHistory(userMsg, disease, token)
+    return None
