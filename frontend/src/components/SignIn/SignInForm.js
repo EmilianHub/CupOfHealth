@@ -4,6 +4,7 @@ import "./SignInForm.css"
 import {useNavigate} from "react-router-dom";
 import {Link} from 'react-router-dom';
 import {setAuthorizationHeader} from "../CookiesManager/CookiesManager";
+import {jwtEncode} from "../JwtManager/JwtManager";
 
 export default function SignInForm() {
     let navigate = useNavigate();
@@ -12,11 +13,11 @@ export default function SignInForm() {
 
 
     function subForm() {
-        axios.post("http://localhost:5000/user/sign_in",
-            {
-                email: email,
-                password: password
-            }, setAuthorizationHeader()
+        const json = {
+            email: email,
+            password: password
+        }
+        axios.post("http://localhost:5000/user/sign_in", jwtEncode(json)
         ).then((response) => {
             if (response.status === HttpStatusCode.Ok) {
                 localStorage.setItem('token', response.data.token);
