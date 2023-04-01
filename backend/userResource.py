@@ -47,7 +47,7 @@ def login():
     args = request.get_json()
     email = args.get('email')
     password = args.get('password')
-    user = userService.getUserWithEmail(email)
+    user = userService.findUserWithEmail(email)
     if hashlib.sha256(password.encode('utf-8')).hexdigest() == user.password:
         token = generateToken(user.email)
         return jsonify({'token': token}), 200
