@@ -1,12 +1,12 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask import render_template
 from flask_cors import CORS
-from flask_login import LoginManager
 
 import processor
+import rsaEncryption
+from jwtService import decodeRequest, encodeResponse
 from locationResource import location
 from userResource import user
-import rsaEncryption
 
 app = Flask(__name__)
 rsaEncryption.saveToFile()
@@ -23,15 +23,12 @@ def index():
 
 @app.post('/chatbot')
 def chatbotResponse():
+    arg = request.get_data()
+    the_question = decodeRequest(arg).get("question")
+    response = processor.chatbot_response(the_question)
+    json = {"response": response}
 
-    #if request.method == 'POST':
-        arg = request.get_json()
-        the_question = arg.get("question")
-        #the_question = request.form['question']
-        #
-        response = processor.chatbot_response(the_question)
-
-        return jsonify({"response": response })
+    return encodeResponse(json)
 
 
 if __name__ == '__main__':

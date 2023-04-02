@@ -1,3 +1,4 @@
+import enum
 from dataclasses import dataclass
 from typing import List
 
@@ -27,7 +28,7 @@ class Responses(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     response: Mapped[str] = mapped_column(nullable=True)
-    response_group = Column(Enum(TagGroup, name="tag_group"))
+    response_group: Mapped[TagGroup] = mapped_column(nullable=False)
 
     pattern: Mapped[List[Patterns]] = relationship(secondary=association_table)
 
@@ -35,6 +36,7 @@ class Responses(Base):
         return f"Responses(id={self.id!r}, response={self.response!r}, response_group={self.response_group!r}, pattern={self.pattern!r})"
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 Base.metadata.create_all(engine)
 

@@ -1,10 +1,10 @@
 import hashlib
 from functools import wraps
 
-import jwt
-from flask import Blueprint, request, redirect, url_for, session, jsonify
-from flask_login import current_user, login_required, login_manager
+from flask import Blueprint, request, jsonify
 
+import jwtService
+from jwtService import generateToken
 from userService import UserService
 
 user = Blueprint("user", __name__)
@@ -45,12 +45,13 @@ def register():
 
 @user.post("/sign_in")
 def login():
-    args = request.get_json()
-    email = args.get('email')
-    password = args.get('password')
-    user = userService.get_user_by_email(email)
+    args = request.get_data()
+    req = jwtService.decodeRequest(args)
+    email = req.get('email')
+    password = req.get('password')
+    user = userService.findUserWithEmail(email)
     if hashlib.sha256(password.encode('utf-8')).hexdigest() == user.password:
-        token = userService.generate_token(user.email)
+        token = generateToken(user.email)
         return jsonify({'token': token}), 200
     else:
         return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
@@ -63,7 +64,7 @@ def token_required(f):
         if not token:
             return jsonify({'error': 'Brak tokenu'}), 401
         try:
-            isAuthenticated = userService.decodeToken(token)
+            isAuthenticated = userService.verifyAuthentication(token)
             if not isAuthenticated:
                 return "Invalid Token", 401
         except:
