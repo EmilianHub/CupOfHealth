@@ -1,32 +1,41 @@
 import pickle
 import random
 from collections import defaultdict
-
+import spacy
+from spacy.lang.pl.examples import sentences
 import nltk
 import numpy as np
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
 from nltk.corpus import wordnet as wn
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
 
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
+from stempel import StempelStemmer
 
 nltk.download('punkt')
 nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('pl196x')
+nltk.download('cess_esp')
 lemmatizer = WordNetLemmatizer()
+stemmer = StempelStemmer.polimorf()
 
 words = []
 classes = []
 documents = []
-ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam"]
+ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam", "dla", "w", "o", "z", "pod", "nad"]
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 groupedCasualPatterns = defaultdict(list)
+
+
 
 for i in casualPatterns:
     groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
@@ -60,6 +69,8 @@ words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in
 
 words = sorted(list(set(words)))
 
+
+
 classes = sorted(list(set(classes)))
 
 print(len(documents), "documents")
@@ -74,10 +85,12 @@ pickle.dump(classes, open('classes.pkl', 'wb'))
 # initializing training data
 training = []
 output_empty = [0] * len(classes)
+nlp = spacy.load("pl_core_news_sm")
+doc = nlp(sentences[0])
+
 for doc in documents:
 
     bag = []
-
     pattern_words = doc[0]
     pattern_words = [lemmatizer.lemmatize(word.lower()) for word in pattern_words]
 
