@@ -12,7 +12,7 @@ body{
     border-radius: 5px;
     height: 600px;
     margin: 20px;
-   #overflow-y: scroll;
+    #overflow-y: scroll;
     padding-right: 10px;
     padding-top: 6%;
     padding-left: 10px ;
@@ -30,13 +30,17 @@ body{
     flex-direction: revert;
     position: static;
     height: 35px;
-
+    #width: 450px;
+    padding-top: 8px;
+    margin-right: 200px;
+    margin-left: 200px;
 
 }
 
 .chat-input input[type="text"] {
     flex-grow: 1;
     margin-right: 10px;
+
 }
 
 .chat-input button {
@@ -62,4 +66,38 @@ body{
 .chatbot{
     height: 200px;
     overflow:auto;
+    width: 900px;
+}
+.userMsg {
+    background-color: #0077cc;
+    align-self: flex-end;
+    text-align: center;
+    width: 400px;
+    line-height: 25px;
+    margin-left: auto;
+    margin-right: auto;
+    #margin: 10px;
+    #padding: 10px;
+    #max-width: 180%;
+    border-radius: 8px;
+}
+
+.chatMsg{
+    background-color: grey;
+    align-self: flex-start;
+    text-align: center;
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    #margin: 10px;
+    #padding: 10px;
+    /*max-width: 80%;*/
+    border-radius: 8px;
+    line-height: 25px;
+}
+.message {
+    margin: 5px;
+    padding: 3px;
+    border-radius: 5px;
+    max-width: 100%;
 }
