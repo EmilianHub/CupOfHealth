@@ -16,7 +16,6 @@ from sqlalchemy import select
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
-from stempel import StempelStemmer
 
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -24,7 +23,6 @@ nltk.download('stopwords')
 nltk.download('pl196x')
 nltk.download('cess_esp')
 lemmatizer = WordNetLemmatizer()
-stemmer = StempelStemmer.polimorf()
 
 words = []
 classes = []

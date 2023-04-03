@@ -50,9 +50,8 @@ export default function Chat() {
                 </div>
                 <div className="chatbot">
                     {data.map((k, v) => (
-                        <div key={v}>
-                            <p> -{k.user}{k.response}</p>
-                            <p></p>
+                        <div className={"message"} key={v}>
+                            <div className={"userMsg"}>{k.user}</div><div className={"chatMsg"}>{k.response}</div>
                         </div>
                     ))}</div>
                 <div className="chat-input">
