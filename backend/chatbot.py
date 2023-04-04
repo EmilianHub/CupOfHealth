@@ -25,7 +25,7 @@ nltk.download('pl196x')
 nltk.download('cess_esp')
 lemmatizer = WordNetLemmatizer()
 stemmer = StempelStemmer.polimorf()
-
+nlp = spacy.load("pl_core_news_sm")
 words = []
 classes = []
 documents = []
@@ -51,7 +51,7 @@ for k, v in groupedCasualPatterns.items():
         if k not in classes:
             classes.append(str(k))
 
-
+#TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
 for i in casualDiseases:
     for j in i.objawy:
         w = nltk.word_tokenize(str(j.objawy))
@@ -62,14 +62,13 @@ for i in casualDiseases:
         if i not in classes:
             classes.append(str(i.choroba))
 
-words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
-words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]
-words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in ignore_words]
 
-
-words = sorted(list(set(words)))
-
-
+words = sorted(list(set([token.lemma_ for word in words for token in nlp(word.lower()) if token.text not in ignore_words])))
+for sentence in sentences:
+    doc = nlp(sentence)
+    for token in doc:
+        if token.lemma_.lower() not in words:
+            words.append(token.lemma_.lower())
 
 classes = sorted(list(set(classes)))
 
@@ -85,14 +84,12 @@ pickle.dump(classes, open('classes.pkl', 'wb'))
 # initializing training data
 training = []
 output_empty = [0] * len(classes)
-nlp = spacy.load("pl_core_news_sm")
-doc = nlp(sentences[0])
+
+
 
 for doc in documents:
-
     bag = []
-    pattern_words = doc[0]
-    pattern_words = [lemmatizer.lemmatize(word.lower()) for word in pattern_words]
+    pattern_words = [token.lemma_ for token in nlp(str(doc[0])) if token.text not in ignore_words]
 
     for w in words:
         bag.append(1) if w in pattern_words else bag.append(0)
@@ -125,5 +122,4 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy
 # fitting and saving the model
 hist = model.fit(np.array(train_x), np.array(train_y), epochs=200, batch_size=5, verbose=1)
 model.save('chatbot_model.h5', hist)
-
 print("model created")
