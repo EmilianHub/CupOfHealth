@@ -11,8 +11,8 @@ class TagGroup(enum.Enum):
     name = "name"
     mood = "mood"
     specify = "specify"
-    few_question = "few_questions"
-#
+    few_questions = "few_questions"
+
     @staticmethod
     def fetch_names():
         return [c.value for c in TagGroup]

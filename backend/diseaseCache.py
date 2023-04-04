@@ -1,5 +1,6 @@
 user_msg = []
 matching = {}
+previousResponseId = 0
 
 
 def addToMsgCache(msg):
@@ -29,3 +30,7 @@ def calculateOccurrences():
 
         return occurrences
     return None
+
+def assignReponseMessageId(id):
+    global previousResponseId
+    previousResponseId = id
