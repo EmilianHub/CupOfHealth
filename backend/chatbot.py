@@ -1,3 +1,4 @@
+import pdb
 import pickle
 import random
 from collections import defaultdict
@@ -54,8 +55,9 @@ for k, v in groupedCasualPatterns.items():
 #TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
 for i in casualDiseases:
     for j in i.objawy:
-        w = [token.text for token in nlp(j.objawy)]
+        w = [token.text for token in nlp(str(j.objawy))]
         words.extend(w)
+
 
         documents.append((w, str(i.choroba)))
 
@@ -64,6 +66,7 @@ for i in casualDiseases:
 
 
 words = sorted(list(set([token.lemma_ for word in words for token in nlp(word.lower()) if token.text not in ignore_words])))
+
 for sentence in sentences:
     doc = nlp(sentence)
     for token in doc:
@@ -84,12 +87,12 @@ pickle.dump(classes, open('classes.pkl', 'wb'))
 # initializing training data
 training = []
 output_empty = [0] * len(classes)
-
-
-
 for doc in documents:
     bag = []
-    pattern_words = [token.lemma_ for token in nlp(str(doc[0])) if token.text not in ignore_words]
+    pattern_words = doc[0]
+    pdb.set_trace()
+    pattern_words = [token.lemma_ for token in pattern_words if token.text not in ignore_words]
+
 
     for w in words:
         bag.append(1) if w in pattern_words else bag.append(0)
