@@ -43,7 +43,7 @@ for i in casualPatterns:
 for k, v in groupedCasualPatterns.items():
     for pattern in v:
 
-        w = nltk.word_tokenize(str(pattern))
+        w = [token.text for token in nlp(pattern)]
         words.extend(w)
 
         documents.append((w, str(k)))
@@ -54,7 +54,7 @@ for k, v in groupedCasualPatterns.items():
 #TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
 for i in casualDiseases:
     for j in i.objawy:
-        w = nltk.word_tokenize(str(j.objawy))
+        w = [token.text for token in nlp(j.objawy)]
         words.extend(w)
 
         documents.append((w, str(i.choroba)))
