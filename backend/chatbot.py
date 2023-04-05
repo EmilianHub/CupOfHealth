@@ -15,6 +15,7 @@ from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
 
+
 nltk.download('punkt')
 nltk.download('wordnet')
 lemmatizer = WordNetLemmatizer()

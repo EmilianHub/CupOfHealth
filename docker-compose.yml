@@ -1,0 +1,37 @@
+version: '3.9'
+
+volumes:
+  postgres-data:
+    driver: local
+
+services:
+  database:
+    container_name: database
+    image: postgres:15.2
+    volumes:
+      - postgres-data:/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=CupOfHealth
+    ports:
+      - 4321:5432
+
+  backend:
+    container_name: backend
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - 5000:5000
+    depends_on:
+      - database
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    volumes:
+      - ./frontend:/api
+      - /api/node_modules
+    ports:
+      - 3000:3000
