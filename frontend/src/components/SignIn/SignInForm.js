@@ -23,6 +23,7 @@ export default function SignInForm() {
                 localStorage.setItem('token', response.data.token);
                 navigate("/");
                 window.location.reload();
+                localStorage.setItem('isLoggedIn', true);
             } else if (response.status === HttpStatusCode.Unauthorized) {
                 window.alert("Nie poprawny login lub hasło")
             }
@@ -33,6 +34,11 @@ export default function SignInForm() {
             console.log(error)
         });
     }
+    const pressEnter = (e) => {
+        if (e.keyCode === 13) {
+            subForm();
+        }
+    };
 
 
     return (
@@ -49,7 +55,7 @@ export default function SignInForm() {
 
                 <div>
                     <label className={"labelStyle1"}>Hasło:</label><br/>
-                    <input type="password" className={"inputStyle1"}
+                    <input type="password" className={"inputStyle1"} onKeyDown={(e) => pressEnter(e)}
                            onChange={(v) => setPassword(v.target.value)}/><br/>
                 </div>
                 <br/>
