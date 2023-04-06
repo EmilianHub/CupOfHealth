@@ -38,34 +38,25 @@ groupedCasualPatterns = defaultdict(list)
 
 
 
-for i in casualPatterns:
-    groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
+for pattern in casualPatterns:
+    pattern_words = [token.lemma_ for token in nlp(pattern.pattern)]
+    words.extend(pattern_words)
+    documents.append((pattern_words, str(pattern.pattern_group.value)))
+    if str(pattern.pattern_group.value) not in classes:
+        classes.append(str(pattern.pattern_group.value))
 
-for k, v in groupedCasualPatterns.items():
-    for pattern in v:
+for disease in casualDiseases:
+    for symptom in disease.objawy:
+        symptom_words = [token.lemma_ for token in nlp(symptom.objawy)]
+        words.extend(symptom_words)
+        documents.append((symptom_words, str(disease.choroba)))
+        if str(disease.choroba) not in classes:
+            classes.append(str(disease.choroba))
 
-        w = [token.text for token in nlp(pattern)]
-        words.extend(w)
+words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
+words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]
+words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in ignore_words]
 
-        documents.append((w, str(k)))
-
-        if k not in classes:
-            classes.append(str(k))
-
-#TODO: Wyciaganie z jpa db_session.scalars(select(Diseases)).fetchall() bez grupowania, budujesz tylko worldneta
-for i in casualDiseases:
-    for j in i.objawy:
-        w = [token.text for token in nlp(str(j.objawy))]
-        words.extend(w)
-
-
-        documents.append((w, str(i.choroba)))
-
-        if i not in classes:
-            classes.append(str(i.choroba))
-
-
-words = sorted(list(set([token.lemma_ for word in words for token in nlp(word.lower()) if token.text not in ignore_words])))
 
 for sentence in sentences:
     doc = nlp(sentence)
@@ -90,12 +81,11 @@ output_empty = [0] * len(classes)
 for doc in documents:
     bag = []
     pattern_words = doc[0]
-    pdb.set_trace()
-    pattern_words = [token.lemma_ for token in pattern_words if token.text not in ignore_words]
-
+    pattern_words = [lemmatizer.lemmatize(word.lower()) for word in pattern_words]
 
     for w in words:
         bag.append(1) if w in pattern_words else bag.append(0)
+
 
     output_row = list(output_empty)
     output_row[classes.index(doc[1])] = 1
