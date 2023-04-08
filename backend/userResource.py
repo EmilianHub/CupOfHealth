@@ -67,7 +67,8 @@ def token_required(f):
             isAuthenticated = userService.verifyAuthentication(token)
             if not isAuthenticated:
                 return "Invalid Token", 401
-        except:
+        except BaseException as e:
+            print(e)
             return jsonify({'error': 'Nieprawidłowy token'}), 401
         return f(*args)
     return decorated

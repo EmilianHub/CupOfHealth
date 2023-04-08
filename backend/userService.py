@@ -77,7 +77,7 @@ class UserService:
             hash = d.hexdigest()
 
             newUser = User(email=email, password=hash)
-            result = db_session.add(newUser)
+            db_session.add(newUser)
             db_session.commit()
             return "zarejestrowano", 200
 

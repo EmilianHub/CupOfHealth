@@ -24,8 +24,6 @@ services:
       dockerfile: ./docker/Dockerfile
     volumes:
       - ./backend:/app
-    command:
-      - nltk.download("wordnet")
     ports:
       - 5000:5000
     depends_on:

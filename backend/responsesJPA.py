@@ -1,4 +1,3 @@
-import enum
 from dataclasses import dataclass
 from typing import List
 
@@ -8,11 +7,10 @@ from sqlalchemy import Table
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from sqlalchemy import Enum
 
-from tagGroup import TagGroup
 from dbConnection import engine, Base
 from patternsJPA import Patterns
+from tagGroup import TagGroup
 
 association_table = Table(
     "patterns_responses",
