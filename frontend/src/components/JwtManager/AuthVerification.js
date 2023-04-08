@@ -11,6 +11,7 @@ export default function AuthVerify() {
             const dToken = decodeJwt(token)
             if (dToken.exp * 1000 < Date.now()) {
                 deleteToken()
+                window.location.reload()
             }
         }
     }, [location])

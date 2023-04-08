@@ -2,7 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Python" name="Python">
-      <configuration sdkName="Python 3.7 (CupOfHealth)" />
+      <configuration sdkName="Python 3.7 (CupOfMedicine)" />
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
