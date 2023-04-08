@@ -19,9 +19,13 @@ services:
 
   backend:
     container_name: backend
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: ./docker/Dockerfile
     volumes:
       - ./backend:/app
+    command:
+      - nltk.download("wordnet")
     ports:
       - 5000:5000
     depends_on:
@@ -29,9 +33,13 @@ services:
 
   frontend:
     container_name: frontend
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: ./docker/Dockerfile
     volumes:
       - ./frontend:/api
       - /api/node_modules
     ports:
       - 3000:3000
+    depends_on:
+      - backend

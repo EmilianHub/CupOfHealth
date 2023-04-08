@@ -16,7 +16,7 @@ export default function Chat() {
         const json = {
             question: question
         }
-        axios.post("http://backend:5000/chatbot", jwtEncode(json), setAuthorizationHeader())
+        axios.post("http://localhost:5000/chatbot", jwtEncode(json), setAuthorizationHeader())
             .then((response) => {
                 data.push(decodeJwt(response.data))
                 navigate('/', {replace: true})
