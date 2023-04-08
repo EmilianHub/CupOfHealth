@@ -1,3 +1,4 @@
+import math
 import pickle
 import random
 from math import ceil
@@ -95,16 +96,16 @@ def retrieveDisesaseResponse(ints, msg):
     for i in ints:
         diseaseCache.addToMatchingCache(msg, i['intent'])
 
-    return retrieveDiseaseResponse(msg)
+    return retrieveDiseaseResponse(ints)
 
 
-def retrieveDiseaseResponse(msg):
+def retrieveDiseaseResponse(ints):
     occurrences = diseaseCache.calculateOccurrences()
 
     if occurrences is not None:
-        confidence = calculateConfidence(occurrences)
+        confidence = calculateConfidence(occurrences, ints[0])
         confidenceKey = next(iter(confidence))
-        confidenceVaule = confidence.get(confidenceKey)
+        confidenceVaule = confidence.get(confidenceKey)[0]
 
         response = getResponseWithConfidance(confidenceKey, confidenceVaule)
         randomResponse = random.choice(response)
@@ -132,7 +133,7 @@ def findResponseWithTagGroup(group):
     return db_session.scalars(responseQuery).fetchall()
 
 
-def calculateConfidence(occurrences):
+def calculateConfidence(occurrences, ints):
     confidence = {}
     for k, v in occurrences.items():
         pDiseaseQuery = select(Diseases).where(Diseases.choroba.ilike(k.lower()))
@@ -140,9 +141,15 @@ def calculateConfidence(occurrences):
         if symptomsAmount is None:
             confidence[k] = 0
         else:
-            confidence[k] = v/len(symptomsAmount.objawy)
+            if ints['intent'] == k:
+                chatbotProbability = v/len(symptomsAmount.objawy) + float(ints['probability'])
+                arr = [v/len(symptomsAmount.objawy), chatbotProbability]
+                confidence[k] = arr
+            else:
+                count = v/len(symptomsAmount.objawy)
+                confidence[k] = [count, count]
 
-    return dict(sorted(confidence.items(), key=lambda item: item[1], reverse=True))
+    return dict(sorted(confidence.items(), key=lambda item: item[1][1], reverse=True))
 
 
 

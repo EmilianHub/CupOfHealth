@@ -1,10 +1,10 @@
-user_msg = []
+user_msg = set()
 matching = {}
 previousResponseId = 0
 
 
 def addToMsgCache(msg):
-    user_msg.append(msg)
+    user_msg.add(msg)
 
 
 def addToMatchingCache(msg, tag):
