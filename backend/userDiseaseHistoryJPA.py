@@ -20,6 +20,7 @@ class UserDiseaseHistory(Base):
     disease_id: Mapped[int] = mapped_column(ForeignKey(Diseases.id_choroba))
     disease: Mapped[Diseases] = relationship()
     created: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.datetime.now())
+    confidence: Mapped[float] = mapped_column(nullable=False)
 
     def __repr__(self) -> str:
         return f"UserDiseaseHistory(id={self.id!r}, user={self.user!r}, userSymptoms={self.user_symptoms!r}, disease={self.disease!r})"

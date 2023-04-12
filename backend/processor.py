@@ -1,10 +1,9 @@
-import math
 import pickle
 import random
 from math import ceil
 
-import spacy
 import numpy as np
+import spacy
 from keras.models import load_model
 from sqlalchemy import select
 
@@ -15,6 +14,7 @@ from jwtService import decodeHeaderToken
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
+from wikipediaService import findFunFactWithMessage
 
 model = load_model('chatbot_model.h5')
 words = pickle.load(open('words.pkl', 'rb'))
@@ -25,14 +25,15 @@ nlp = spacy.load("pl_core_news_sm")
 
 def clean_up_sentence(sentence):
     tokenizedWord = nlp(sentence)
-    sentence_words = [token.text.lower() for token in tokenizedWord]
+    sentence_words = [sentence]
+    sentence_words += [token.text.lower() for token in tokenizedWord]
     sentence_words += [token.lemma_.lower() for token in tokenizedWord]
     return set(sentence_words)
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
 
 
-def bow(sentence, words, show_details=True):
+def bow(sentence, show_details=True):
     # tokenize the pattern
     sentence_words = clean_up_sentence(sentence)
     # bag of words - matrix of N words, vocabulary matrix
@@ -44,15 +45,15 @@ def bow(sentence, words, show_details=True):
                 bag[i] = 1
                 if show_details:
                     print("found in bag: %s" % w)
-    return (np.array(bag))
+    return np.array(bag)
 
 
-def predict_class(sentence, model):
+def predict_class(sentence):
     # filter out predictions below a threshold
-    p = bow(sentence, words, show_details=False)
+    p = bow(sentence, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.25
-    results = [[i, r] for i, r in enumerate(res) if r > ERROR_THRESHOLD]
+    ERROR_THRESHOLD = 0.2
+    results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
     return_list = []
@@ -70,7 +71,7 @@ def getResponse(ints, msg):
 
         return retrieveDisesaseResponse(ints, msg)
 
-    return "Na obecną chwilę nie mam na to odpowiedzi, przepraszam"
+    return findFunFactWithMessage(msg)
 
 
 def isCasualResponse(tag):
@@ -118,10 +119,10 @@ def retrieveDiseaseResponse(ints):
 
 def getResponseWithConfidance(confidenceKey, confidenceVaule):
     if confidenceVaule >= 0.6:
-        saveUserDiseaseHistory(confidenceKey)
+        saveUserDiseaseHistory(confidenceKey, confidenceVaule)
         return findResponseWithTagGroup(TagGroup.disease)
-    elif 0.6 > confidenceVaule > 0.3:
-        saveUserDiseaseHistory(confidenceKey)
+    elif 0.6 > confidenceVaule > 0.3 or len(diseaseCache.user_msg) >= 3:
+        saveUserDiseaseHistory(confidenceKey, confidenceVaule)
         return findResponseWithTagGroup(TagGroup.question)
 
     return findResponseWithTagGroup(TagGroup.few_questions)
@@ -152,16 +153,15 @@ def calculateConfidence(occurrences, ints):
     return dict(sorted(confidence.items(), key=lambda item: item[1][1], reverse=True))
 
 
-
 def chatbot_response(msg):
-    ints = predict_class(msg, model)
+    ints = predict_class(msg)
     res = getResponse(ints, msg)
     return res
 
 
-def saveUserDiseaseHistory(disease: str):
+def saveUserDiseaseHistory(disease: str, confidence: float):
     token = decodeHeaderToken()
     if token:
         userMsg = diseaseCache.user_msg
-        return userService.saveDiseaseHistory(userMsg, disease, token)
+        return userService.saveDiseaseHistory(userMsg, disease, token, confidence)
     return None

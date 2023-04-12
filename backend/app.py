@@ -1,5 +1,4 @@
 from flask import Flask, request
-from flask import render_template
 from flask_cors import CORS
 
 import processor
@@ -14,11 +13,6 @@ app.config['SECRET_KEY'] = 'enter-a-very-secretive-key-3479373'
 app.register_blueprint(user, url_prefix="/user")
 app.register_blueprint(location, url_prefix="/location")
 CORS(app)
-
-
-@app.route('/', methods=["GET", "POST"])
-def index():
-    return render_template('index.html', **locals())
 
 
 @app.post('/chatbot')

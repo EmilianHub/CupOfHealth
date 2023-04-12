@@ -1,7 +1,6 @@
 import pdb
 import pickle
 import random
-from collections import defaultdict
 
 import numpy as np
 import spacy
@@ -15,42 +14,47 @@ from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
 
-nlp = spacy.load("pl_core_news_sm")
+nlp = spacy.load("pl_core_news_md")
 words = []
 classes = []
 documents = []
-ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam", "dla", "w", "o", "z", "pod", "nad"]
+
+ignore_words = nlp.Defaults.stop_words
+ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
-groupedCasualPatterns = defaultdict(list)
 
 
 for pattern in casualPatterns:
     tokenizedWord = nlp(pattern.pattern)
-    pattern_words = [token.text for token in tokenizedWord]
-    pattern_words += [token.lemma_ for token in tokenizedWord]
+    pattern_words = [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+
     words.extend(pattern_words)
     documents.append((pattern_words, str(pattern.pattern_group.value)))
+
     if str(pattern.pattern_group.value) not in classes:
         classes.append(str(pattern.pattern_group.value))
 
 for disease in casualDiseases:
     for symptom in disease.objawy:
         tokenizedWord = nlp(symptom.objawy)
-        symptom_words = [token.text for token in tokenizedWord]
-        symptom_words += [token.lemma_ for token in tokenizedWord]
+        symptom_words = [symptom.objawy]
+        symptom_words += [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+        symptom_words += [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+
         words.extend(symptom_words)
         documents.append((symptom_words, str(disease.choroba)))
+
         if str(disease.choroba) not in classes:
             classes.append(str(disease.choroba))
-
 
 for sentence in sentences:
     doc = nlp(sentence)
     for token in doc:
-        if token.lemma_.lower() not in words:
+        if token.lemma_.lower() not in words and ignore_words:
             words.append(token.lemma_.lower())
+
 
 words = sorted(list(set(words)))
 classes = sorted(list(set(classes)))
@@ -73,7 +77,7 @@ for doc in documents:
     temp = []
     for word in pattern_words:
         tokenizedWord = nlp(word)
-        temp.extend([token.lemma_ for token in tokenizedWord if token.lemma_ not in ignore_words])
+        temp.extend([token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
 
     for w in words:
         bag.append(1) if w in temp else bag.append(0)
