@@ -50,7 +50,7 @@ for disease in casualDiseases:
             classes.append(str(disease.choroba))
 
 for disease in casualDiseases:
-    question = [f"Co to jest {disease.choroba}", f"Opisz mi {disease.choroba}", f"Podaj mi opis {disease.choroba}"]
+    question = [f"Co to jest {disease.choroba}", f"Opisz mi {disease.choroba}", f"Podaj mi opis {disease.choroba}", f"Jakie objawy ma {disease.choroba}"]
     for q in question:
         tokenizedWord = nlp(q)
         pattern_words = [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
