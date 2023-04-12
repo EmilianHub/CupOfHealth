@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import axios, {HttpStatusCode} from 'axios';
 import "./RemindPassForm.css"
 import {useNavigate} from "react-router-dom";
+import {jwtEncode} from "../JwtManager/JwtManager";
 
 function RemindPass() {
 
@@ -12,9 +13,11 @@ function RemindPass() {
 
     function sendEmail(e) {
         e.preventDefault();
-        axios.post('http://localhost:5000/user/send_code', {
+        const json = {
             email: email
-        }).then((res) => {
+        }
+        axios.post('http://localhost:5000/user/send_code', jwtEncode(json)
+        ).then((res) => {
             switch (res.status) {
                 case HttpStatusCode.Ok:
                     window.alert(`Kod został wysłany na adres ${email}.`);
@@ -38,10 +41,12 @@ function RemindPass() {
 
     function sendCode(e) {
         e.preventDefault();
-        axios.post('http://localhost:5000/user/verify_code', {
+        const json = {
             email: email,
             code: parseInt(code)
-        }).then((res) => {
+        }
+        axios.post('http://localhost:5000/user/verify_code', jwtEncode(json)
+        ).then((res) => {
             switch (res.status) {
                 case HttpStatusCode.Ok:
                     navigate("/verify", {
@@ -73,7 +78,7 @@ function RemindPass() {
 
     function emailForm() {
         return (<div className={"container_pass"}>
-            <h1>Przypominanie hasła</h1>
+            <h1>Restart hasła</h1>
             <form className="form_pass" onSubmit={sendEmail}>
                 <label className="label_pass" htmlFor="email">Podaj adres e-mail:</label>
                 <input className="input_pass"
@@ -90,7 +95,7 @@ function RemindPass() {
 
     function codeForm() {
         return (<div className={"container_pass"}>
-                <h1>Przypominanie hasła</h1>
+                <h1>Restart hasła</h1>
                 <form className="form_pass" onSubmit={sendCode}>
                     <label className="label_pass" htmlFor="code">Podaj kod weryfikacyjny:</label>
                     <input className="input_pass"
@@ -98,7 +103,6 @@ function RemindPass() {
                            id="code"
                            value={code}
                            onChange={(e) => setCode(e.target.value)}
-                           required
                     />
                     <button className="button_pass" type="submit">Wyślij kod</button>
                 </form>

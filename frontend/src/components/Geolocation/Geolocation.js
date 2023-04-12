@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import {decodeJwt, jwtEncode} from "../JwtManager/JwtManager";
 
 export function getCurrentPosition() {
     navigator.geolocation.getCurrentPosition(
@@ -12,14 +13,15 @@ export function getCurrentPosition() {
 }
 
 function sendLocation(position) {
-    axios.post("http://localhost:5000/location/", {
+    const json = {
         latitude: position.coords.latitude.toString(),
         longitude: position.coords.longitude.toString()
-    }).then((res) => {
-        console.log(res)
+    }
+    axios.post("http://localhost:5000/location/", jwtEncode(json)
+    ).then((res) => {
+        console.log(decodeJwt(res.data))
+    }).catch((err) => {
+        console.log(`Something gone wrong, ${err}`)
     })
-        .catch((err) => {
-            console.log(`Something gone wrong, ${err}`)
-        })
 }
 
