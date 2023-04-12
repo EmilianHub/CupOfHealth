@@ -1,69 +1,62 @@
 import pdb
 import pickle
 import random
-from collections import defaultdict
-import spacy
-from spacy.lang.pl.examples import sentences
-import nltk
+
 import numpy as np
+import spacy
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
-from nltk.corpus import wordnet as wn
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
-from stempel import StempelStemmer
 
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('stopwords')
-nltk.download('pl196x')
-nltk.download('cess_esp')
-lemmatizer = WordNetLemmatizer()
-stemmer = StempelStemmer.polimorf()
-nlp = spacy.load("pl_core_news_sm")
+nlp = spacy.load("pl_core_news_md")
 words = []
 classes = []
 documents = []
-ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam", "dla", "w", "o", "z", "pod", "nad"]
+
+ignore_words = nlp.Defaults.stop_words
+ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
-groupedCasualPatterns = defaultdict(list)
-
 
 
 for pattern in casualPatterns:
-    pattern_words = [token.lemma_ for token in nlp(pattern.pattern)]
+    tokenizedWord = nlp(pattern.pattern)
+    pattern_words = [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+
     words.extend(pattern_words)
     documents.append((pattern_words, str(pattern.pattern_group.value)))
+
     if str(pattern.pattern_group.value) not in classes:
         classes.append(str(pattern.pattern_group.value))
 
 for disease in casualDiseases:
     for symptom in disease.objawy:
-        symptom_words = [token.lemma_ for token in nlp(symptom.objawy)]
+        tokenizedWord = nlp(symptom.objawy)
+        symptom_words = [symptom.objawy]
+        symptom_words += [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+        symptom_words += [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+
         words.extend(symptom_words)
         documents.append((symptom_words, str(disease.choroba)))
+
         if str(disease.choroba) not in classes:
             classes.append(str(disease.choroba))
-
-words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
-words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]
-words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in ignore_words]
-
 
 for sentence in sentences:
     doc = nlp(sentence)
     for token in doc:
-        if token.lemma_.lower() not in words:
+        if token.lemma_.lower() not in words and ignore_words:
             words.append(token.lemma_.lower())
 
+
+words = sorted(list(set(words)))
 classes = sorted(list(set(classes)))
 
 print(len(documents), "documents")
@@ -81,11 +74,13 @@ output_empty = [0] * len(classes)
 for doc in documents:
     bag = []
     pattern_words = doc[0]
-    pattern_words = [lemmatizer.lemmatize(word.lower()) for word in pattern_words]
+    temp = []
+    for word in pattern_words:
+        tokenizedWord = nlp(word)
+        temp.extend([token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
 
     for w in words:
-        bag.append(1) if w in pattern_words else bag.append(0)
-
+        bag.append(1) if w in temp else bag.append(0)
 
     output_row = list(output_empty)
     output_row[classes.index(doc[1])] = 1
@@ -93,7 +88,7 @@ for doc in documents:
     training.append([bag, output_row])
 
 random.shuffle(training)
-training = np.array(training)
+training = np.array(training, dtype=object)
 # create train and test lists. X - patterns, Y - intents
 train_x = list(training[:, 0])
 train_y = list(training[:, 1])
