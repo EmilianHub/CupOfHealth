@@ -49,9 +49,9 @@ def login():
     req = jwtService.decodeRequest(args)
     email = req.get('email')
     password = req.get('password')
-    user = userService.findUserWithEmail(email)
-    if hashlib.sha256(password.encode('utf-8')).hexdigest() == user.password:
-        token = generateToken(user.email)
+    pUser = userService.findUserWithEmail(email)
+    if hashlib.sha256(password.encode('utf-8')).hexdigest() == pUser.password:
+        token = generateToken(pUser.email)
         return jsonify({'token': token}), 200
     else:
         return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
@@ -67,7 +67,8 @@ def token_required(f):
             isAuthenticated = userService.verifyAuthentication(token)
             if not isAuthenticated:
                 return "Invalid Token", 401
-        except:
+        except BaseException as e:
+            print(e)
             return jsonify({'error': 'Nieprawidłowy token'}), 401
         return f(*args)
     return decorated

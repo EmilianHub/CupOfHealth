@@ -1,33 +1,33 @@
+import math
 import pickle
 import random
 from math import ceil
 
-import nltk
+import spacy
 import numpy as np
 from keras.models import load_model
-from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
 
 import diseaseCache
 from chorobyJPA import Diseases
 from dbConnection import db_session
+from jwtService import decodeHeaderToken
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
-from jwtService import decodeHeaderToken
 
-lemmatizer = WordNetLemmatizer()
 model = load_model('chatbot_model.h5')
 words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
+nlp = spacy.load("pl_core_news_sm")
 
 
 def clean_up_sentence(sentence):
-    sentence_words = nltk.word_tokenize(sentence)
-    sentence_words = [lemmatizer.lemmatize(word.lower()) for word in sentence_words]
+    tokenizedWord = nlp(sentence)
+    sentence_words = [token.text.lower() for token in tokenizedWord]
+    sentence_words += [token.lemma_.lower() for token in tokenizedWord]
     return set(sentence_words)
-
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
 
@@ -96,16 +96,16 @@ def retrieveDisesaseResponse(ints, msg):
     for i in ints:
         diseaseCache.addToMatchingCache(msg, i['intent'])
 
-    return retrieveDiseaseResponse(msg)
+    return retrieveDiseaseResponse(ints)
 
 
-def retrieveDiseaseResponse(msg):
+def retrieveDiseaseResponse(ints):
     occurrences = diseaseCache.calculateOccurrences()
 
     if occurrences is not None:
-        confidence = calculateConfidence(occurrences)
+        confidence = calculateConfidence(occurrences, ints[0])
         confidenceKey = next(iter(confidence))
-        confidenceVaule = confidence.get(confidenceKey)
+        confidenceVaule = confidence.get(confidenceKey)[0]
 
         response = getResponseWithConfidance(confidenceKey, confidenceVaule)
         randomResponse = random.choice(response)
@@ -133,7 +133,7 @@ def findResponseWithTagGroup(group):
     return db_session.scalars(responseQuery).fetchall()
 
 
-def calculateConfidence(occurrences):
+def calculateConfidence(occurrences, ints):
     confidence = {}
     for k, v in occurrences.items():
         pDiseaseQuery = select(Diseases).where(Diseases.choroba.ilike(k.lower()))
@@ -141,9 +141,15 @@ def calculateConfidence(occurrences):
         if symptomsAmount is None:
             confidence[k] = 0
         else:
-            confidence[k] = v/len(symptomsAmount.objawy)
+            if ints['intent'] == k:
+                chatbotProbability = v/len(symptomsAmount.objawy) + float(ints['probability'])
+                arr = [v/len(symptomsAmount.objawy), chatbotProbability]
+                confidence[k] = arr
+            else:
+                count = v/len(symptomsAmount.objawy)
+                confidence[k] = [count, count]
 
-    return dict(sorted(confidence.items(), key=lambda item: item[1], reverse=True))
+    return dict(sorted(confidence.items(), key=lambda item: item[1][1], reverse=True))
 
 
 
