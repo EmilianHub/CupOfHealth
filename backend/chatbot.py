@@ -49,6 +49,19 @@ for disease in casualDiseases:
         if str(disease.choroba) not in classes:
             classes.append(str(disease.choroba))
 
+for disease in casualDiseases:
+    question = [f"Co to jest {disease.choroba}", f"Opisz mi {disease.choroba}", f"Podaj mi opis {disease.choroba}"]
+    for q in question:
+        tokenizedWord = nlp(q)
+        pattern_words = [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+        pattern_words += [token.lemma.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+
+        words.extend(pattern_words)
+        documents.append((pattern_words, f"Opis: {disease.choroba}"))
+
+        if str(disease.choroba) not in classes:
+            classes.append(str(disease.choroba))
+
 for sentence in sentences:
     doc = nlp(sentence)
     for token in doc:
