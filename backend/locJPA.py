@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 
 
 
-class Loca(Base):
+class Localization(Base):
     __tablename__ = 'localization'
 
     id_loc: Mapped[int] = mapped_column(primary_key=True)

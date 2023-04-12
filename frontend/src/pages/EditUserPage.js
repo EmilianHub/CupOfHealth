@@ -1,11 +1,18 @@
-import {useEffect} from "react";
-import Axios from "axios";
 import EditUserForm from "../components/Edituser/EditUserForm";
+import {useNavigate} from "react-router-dom";
+import {useEffect} from "react";
 
-export default function  EditUserPage(){
+export default function EditUserPage() {
+    const navigate = useNavigate()
 
-    return(
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (token == null) {
+            navigate("/")
+        }
+    })
+
+    return (
         <div><EditUserForm/></div>
-
     )
 }

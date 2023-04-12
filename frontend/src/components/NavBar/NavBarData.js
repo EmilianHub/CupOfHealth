@@ -15,9 +15,9 @@ export const NavBarData = [
 
         link: "/sign_in",
     }
-    ];
+];
 
-function getUserEmail(){
+function getUserEmail() {
     const token = localStorage.getItem("token")
     if (token !== null) {
         let tokenDecoded = jwtDecode(token)
@@ -32,11 +32,12 @@ export const NavBarDataUser = [
         link: "/"
     },
     {
-      name: getUserEmail(),
+        name: getUserEmail(),
+        link: "/edit_user"
     },
     {
         name: "Wyloguj",
 
         link: "/logout",
     }
-    ];
+];

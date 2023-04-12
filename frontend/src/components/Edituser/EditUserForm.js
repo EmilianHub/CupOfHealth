@@ -1,24 +1,23 @@
 import React, {useState} from 'react';
 import axios, {HttpStatusCode} from 'axios';
 import "./EdiUserForm.css"
-import {useLocation, useNavigate} from "react-router-dom";
+import {jwtEncode} from "../JwtManager/JwtManager";
+import {getToken, setAuthorizationHeader} from "../CookiesManager/CookiesManager";
 
 export default function VerifyForm() {
 
-    const {state} = useLocation();
     const [message, setMessage] = useState('');
     const [password, setPassword] = useState('');
     const [email, setemail] = useState('');
-    const [newemail, setnewemail] = useState('');
-
-
+    const [newemail, setNewEmail] = useState('');
 
     function sendNewPassword(e) {
         e.preventDefault();
-        axios.post('http://localhost:5000/user/new_password', {
-            email: email,
+        const json = {
             password: password
-        }).then((res) => {
+        }
+        axios.post('http://localhost:5000/user/new_password', jwtEncode(json), setAuthorizationHeader()
+        ).then((res) => {
             switch (res.status) {
                 case HttpStatusCode.Ok:
                     window.alert("Hasło zostało zmienione")
@@ -40,29 +39,30 @@ export default function VerifyForm() {
         });
     }
 
-        function NewEmial(e) {
-            e.preventDefault();
-            axios.post('http://localhost:5000/user/edit_email', {
-                email: "emil@o2.pl",
-                newemail: newemail
-            }).then((res) => {
-                switch (res.status) {
-                    case HttpStatusCode.Ok:
-                        window.alert("emial zostało zmienione")
-                        window.location.reload()
-                        break;
-                    default:
-                        window.alert(`Nie udało się zmienić emial. Spróbuj ponownie później.`)
-                        break;
-                }
-            }).catch((err) => {
-                switch (err.response.status) {
-                    case HttpStatusCode.BadRequest:
-                        window.alert(`Nie udało się zmienić emiala. Spróbuj ponownie później.`)
-                        break;
-                }
-            });
+    function NewEmail(e) {
+        e.preventDefault();
+        const json = {
+            newEmail: newemail
         }
+        axios.post('http://localhost:5000/user/edit_email', jwtEncode(json), setAuthorizationHeader()
+        ).then((res) => {
+            switch (res.status) {
+                case HttpStatusCode.Ok:
+                    window.alert("Emial został zmieniony")
+                    window.location.reload()
+                    break;
+                default:
+                    window.alert(`Nie udało się zmienić email'a. Spróbuj ponownie później.`)
+                    break;
+            }
+        }).catch((err) => {
+            switch (err.response.status) {
+                case HttpStatusCode.BadRequest:
+                    window.alert(`Nie udało się zmienić email'a. Spróbuj ponownie później.`)
+                    break;
+            }
+        });
+    }
 
 
     return (
@@ -72,25 +72,28 @@ export default function VerifyForm() {
                 <label className="label_pass1" htmlFor="new_pass1">Podaj nowe hasło:</label>
                 <input className="input_pass1"
                        type="password"
-                       onChange={(e)=>{setPassword(e.target.value)}}
+                       onChange={(e) => {
+                           setPassword(e.target.value)
+                       }}
                        id="new_pass1"
                        pattern={"^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$"}
                        title={"Hasło powinno zawierać co najmniej jedną duża literę i jeden znak specjalny"}
                 />
 
-                <button className="button_pass1"type="submit">Zmień hasło</button>
+                <button className="button_pass1" type="submit">Zmień hasło</button>
             </form>
             <p>{message}</p>
 
             <h1>Utwórz nowy email</h1>
-            <form className="form_pass1" onSubmit={NewEmial}>
+            <form className="form_pass1" onSubmit={NewEmail}>
                 <label className="label_pass1" htmlFor="new_email1">Podaj nowe emial:</label>
                 <input className="input_pass1"
-                       onChange={(e)=>{setnewemail(e.target.value)}}
+                       onChange={(e) => {
+                           setNewEmail(e.target.value)
+                       }}
                        id="new_email1"
                 />
-
-                <button className="button_pass1"type="submit">Zmień emial</button>
+                <button className="button_pass1" type="submit">Zmień emial</button>
             </form>
             <p>{message}</p>
         </div>
