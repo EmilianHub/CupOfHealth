@@ -1,12 +1,11 @@
-from flask import Flask, jsonify, request
-from flask import render_template
+from flask import Flask, request
 from flask_cors import CORS
-from flask_login import LoginManager
 
 import processor
+import rsaEncryption
+from jwtService import decodeRequest, encodeResponse
 from locationResource import location
 from userResource import user
-import rsaEncryption
 
 app = Flask(__name__)
 rsaEncryption.saveToFile()
@@ -16,21 +15,15 @@ app.register_blueprint(location, url_prefix="/location")
 CORS(app)
 
 
-@app.route('/', methods=["GET", "POST"])
-def index():
-    return render_template('index.html', **locals())
-
-
-@app.route('/chatbot', methods=["GET", "POST"])
+@app.post('/chatbot')
 def chatbotResponse():
+    arg = request.get_data()
+    the_question = decodeRequest(arg).get("question")
+    response = processor.chatbot_response(the_question)
+    json = {"response": response}
 
-    if request.method == 'POST':
-        the_question = request.form['question']
-
-        response = processor.chatbot_response(the_question)
-
-    return jsonify({"response": response })
+    return encodeResponse(json)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, host="0.0.0.0")

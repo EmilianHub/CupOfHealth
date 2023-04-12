@@ -1,29 +1,24 @@
-import datetime
 import hashlib
 import random
-
-from locJPA import Loca
-from locationService import getCurrentLocation
-from userDiseaseHistoryJPA import UserDiseaseHistory
-from dbConnection import db_session
 import re
+from datetime import datetime, timedelta
 
-import jwt
-from flask import redirect, url_for
-from flask_login import logout_user
-from sqlalchemy import select, update, func
+from flask import jsonify
+from sqlalchemy import select, update, func, Interval
 
 import restartCodeCache as restartCodeCache
-from dbConnection import db_session
-from emailService import EmailService
-import re
 import rsaEncryption
 from chorobyJPA import Diseases
+from dbConnection import db_session
+from emailService import EmailService
+import jwtService
+from userDiseaseHistoryJPA import UserDiseaseHistory
 from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-SECRET_KEY = 'secret'
+TOKEN_EXPIRATION_OFFSET = 30
+
 
 class UserService:
     # That makes the class Singleton
@@ -49,10 +44,9 @@ class UserService:
 
     def __isUserExist(self, email: str):
         try:
-            query = select(func.count("*")).select_from(User).where(User.email == email)
-            result = db_session.execute(query).one()
-            return result.count != 0
-        except(Exception) as error:
+            result = self.findUserWithEmail(email)
+            return result is not None
+        except Exception as error:
             print("Error occurred while looking for user: ", error)
 
         return False
@@ -66,96 +60,93 @@ class UserService:
     def updatePassword(self, email: str, password: str):
         if passwordRegex.match(str(password)):
             try:
-                query = update(User).where(User.email == email).values(password=hash)
+                d = hashlib.sha256(password.encode())
+                encodePassword = d.hexdigest()
+                query = update(User).where(User.email == email).values(password=encodePassword)
                 result = db_session.execute(query)
                 db_session.commit()
                 if result.rowcount != 0:
                     return "Password updated", 200
-            except(Exception) as error:
+            except Exception as error:
                 print("Error occurred while updating user: ", error)
 
             return "Something gone wrong. Password has not been updated", 400
 
         return "Password should contain at least one uppercase and one special character", 400
 
-    def register (self, email: str, password: str):
-
+    def register(self, email: str, password: str):
         try:
             d = hashlib.sha256(password.encode())
             hash = d.hexdigest()
 
-            newUser=User(email=email, password=hash)
-            result = db_session.add(newUser)
+            newUser = User(email=email, password=hash)
+            db_session.add(newUser)
             db_session.commit()
-            return "zarejestrowano", 200
+            return "Zarejestrowano", 200
 
-        except(Exception) as error:
+        except Exception as error:
             print(error)
 
-        return 'złe dane do rejestracyji ', 401
+        return 'Niepoprawne dane rejestracyjne', 401
 
-    def editemail(self, email: str, newemail: str):
+    def tryLogin(self, email: str, password: str):
+        user = self.findUserWithEmail(email)
+        if user is not None and self.__isPasswordCorrect(password, user):
+            token = jwtService.generateToken(user.email)
+            return jsonify({'token': token}), 200
 
-            try:
-                query = update(User).where(User.email == email).values(email=newemail)
-                result = db_session.execute(query)
-                db_session.commit()
-                if result.rowcount != 0:
-                    return "emial updated", 200
-                return "Something gone wrong. emial has not been updated", 400
-            except(Exception) as error:
-                print("Error occurred while updating user: ", error)
+        else:
+            return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
 
-            return "Something gone wrong. email has not been updated", 400
+    def __isPasswordCorrect(self, plainPassword, user):
+        return hashlib.sha256(plainPassword.encode('utf-8')).hexdigest() == user.password
 
-    def login(self, email: str, password: str):
-        try:
-            query = select(User).where(User.email == email).where(User.password == password)
-            result = db_session.execute(query).one()
-            if result is not None:
-                return 'Zalogowany', 200
-
-            return 'Nieprawidłowy login lub hasło', 401
-
-        except(Exception) as error:
-            print(error)
-
-        return 'Nieprawidłowy login lub hasło', 401
-
-    def get_user_by_email(self, email):
+    def findUserWithEmail(self, email):
         return User.query.filter_by(email=email).first()
 
-    def generate_token(self, email):
-        # generowanie tokena JWT
-        token = jwt.encode({'email': email, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, SECRET_KEY, algorithm='HS256')
-        return token
-
-    def decodeToken(self, token):
-        data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
-        result = self.get_user_by_email(data.get("email"))
+    def verifyAuthentication(self, token):
+        data = jwtService.decodeRequest(token)
+        result = self.findUserWithEmail(data.get("email"))
         if result is None:
             return False
         return True
 
-    def saveDiseaseHistory(self, userId: int, userSymptoms: [], disease: str):
+    def saveDiseaseHistory(self, userSymptoms: [], disease: str, token, confidence):
         try:
             symptoms = ""
             for msg in userSymptoms:
                 symptoms += msg
 
             encryptedSymptoms = rsaEncryption.encrypt(symptoms)
-            query = select(Diseases).where(Diseases.choroba == disease)
-            diseaseJPA = db_session.scalars(query).one()
+            diseaseJPA = self.findDiseaseReferance(disease)
+            userJPA = self.findUserWithEmail(token.get("email"))
+            self.mergeHistory(encryptedSymptoms, diseaseJPA, userJPA, token, confidence)
 
-            history = UserDiseaseHistory(user_id=userId, user_symptoms=encryptedSymptoms, disease=diseaseJPA)
-            db_session.add(history)
-            db_session.commit()
             return "History saved", 200
 
         except(Exception) as error:
             print("Error while saving user history: ", error)
 
         return "Something gone wrong", 400
+
+    def findDiseaseReferance(self, disease: str):
+        query = select(Diseases).where(Diseases.choroba == disease)
+        return db_session.scalars(query).one()
+
+    def mergeHistory(self, symtoms, diseaseJPA, userJPA, token, confidence):
+        exp = datetime.utcfromtimestamp(token.get("exp"))
+        query = select(UserDiseaseHistory) \
+            .where(UserDiseaseHistory.user_id == userJPA.id) \
+            .where(UserDiseaseHistory.created + func.cast(timedelta(minutes=TOKEN_EXPIRATION_OFFSET), Interval) >= exp)
+        historyJPA = db_session.scalars(query).one_or_none()
+
+        newHistoryJPA = UserDiseaseHistory(user=userJPA, user_symptoms=symtoms, disease=diseaseJPA,
+                                           confidence=confidence)
+        if historyJPA is not None:
+            newHistoryJPA.id = historyJPA.id
+
+        db_session.merge(newHistoryJPA)
+        db_session.commit()
 
 
     def saveLocalization(self,latitude: str, longitude: str,choroba: str, email: str ):
@@ -172,9 +163,3 @@ class UserService:
         except(Exception) as error:
             print(error)
         return "niedziała"
-
-
-
-
-
-

@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import axios, {HttpStatusCode} from 'axios';
 import "./VerifyForm.css"
 import {useLocation, useNavigate} from "react-router-dom";
+import {jwtEncode} from "../JwtManager/JwtManager";
 
 export default function VerifyForm() {
 
@@ -14,10 +15,12 @@ export default function VerifyForm() {
 
     function sendNewPassword(e) {
         e.preventDefault();
-        axios.post('http://localhost:5000/user/new_password', {
+        const json = {
             email: state.email,
             password: password
-        }).then((res) => {
+        }
+        axios.post('http://localhost:5000/user/new_password', jwtEncode(json)
+        ).then((res) => {
             switch(res.status) {
                 case HttpStatusCode.Ok:
                     navigate("/sign_in")
@@ -45,11 +48,9 @@ export default function VerifyForm() {
             if (retypePass.toString() === password.toString()) {
                 setIdentical(true)
                 setMessage("")
-                console.log(`Inner ${areIdentical}`)
                 return;
             }
             setMessage("Hasła nie są identyczne")
-            console.log(areIdentical)
         }
         setIdentical(false)
     }
@@ -82,7 +83,7 @@ export default function VerifyForm() {
                 />
                 <button className="button_pass" disabled={!areIdentical} type="submit">Zmień hasło</button>
             </form>
-            <p>{message}</p>
+            <p id={"errorP"}>{message}</p>
         </div>
     );
 }

@@ -11,7 +11,6 @@ const Navbar = () => {
 
     useEffect(() => {
         const token = localStorage.getItem("token")
-        console.log(token)
         if (token !== null) {
             setNavBar(NavBarDataUser)
         } else {
