@@ -8,6 +8,8 @@ from sqlalchemy import select, update, func, Interval
 
 import restartCodeCache as restartCodeCache
 import rsaEncryption
+from locJPA import Localization
+from locationService import getCurrentLocation
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from emailService import EmailService
@@ -147,3 +149,33 @@ class UserService:
 
         db_session.merge(newHistoryJPA)
         db_session.commit()
+
+    def saveLocalization(self, latitude: str, longitude: str, choroba: str, email: str):
+        try:
+            location = getCurrentLocation(longitude, latitude)
+            query = select(Diseases).where(Diseases.choroba == choroba)
+            diseaseJPA = db_session.scalars(query).one()
+            userJPA = self.findUserWithEmail(email)
+
+            locJPA = Localization(woj=location["address"]["state"], miasto=location["address"]["city"], choroba=diseaseJPA, user=userJPA)
+            db_session.add(locJPA)
+            db_session.commit()
+            return "Disease localization saved"
+        except Exception as error:
+            print(error)
+
+        return "Disease localization not saved"
+
+    def editEmail(self, email: str, newEmail: str):
+        try:
+            query = update(User).where(User.email == email).values(email=newEmail)
+            result = db_session.execute(query)
+            db_session.commit()
+
+            if result.rowcount != 0:
+                return "Email updated", 200
+            return "Something gone wrong. email has not been updated", 400
+        except Exception as error:
+            print("Error occurred while updating user: ", error)
+
+        return "Something gone wrong. email has not been updated", 400

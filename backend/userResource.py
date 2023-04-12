@@ -9,7 +9,6 @@ user = Blueprint("user", __name__)
 
 userService = UserService()
 
-
 @user.post("/send_code")
 def sendRestartCode():
     args = jwtService.decodeRequest(request.get_data())
@@ -29,8 +28,28 @@ def verifyRestartCode():
 def updatePassword():
     args = jwtService.decodeRequest(request.get_data())
     email = args.get("email")
+    if email is None:
+        email = jwtService.decodeHeaderToken().get("email")
     password = args.get("password")
     return userService.updatePassword(email, password)
+
+
+@user.post("/edit_email")
+def edit_email():
+    args = jwtService.decodeRequest(request.get_data())
+    email = jwtService.decodeHeaderToken().get("email")
+    newEmail = args.get("newEmail")
+    return userService.editEmail(email, newEmail)
+
+
+@user.post('/save_localization')
+def saveLocalization():
+    args = jwtService.decodeRequest(request.get_data())
+    woj = args.get("lat")
+    miasto = args.get("long")
+    choroba = args.get("choroba")
+    email = args.get("email")
+    return userService.saveLocalization(woj, miasto, choroba, email)
 
 
 @user.post("/register")
@@ -47,7 +66,6 @@ def login():
     email = req.get('email')
     password = req.get('password')
     return userService.tryLogin(email, password)
-
 
 
 def token_required(f):
