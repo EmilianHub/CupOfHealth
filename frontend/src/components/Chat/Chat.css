@@ -34,10 +34,12 @@ body{
     flex-direction: revert;
     position: static;
     height: 35px;
-    #width: 450px;
     padding-top: 8px;
     margin-right: 200px;
     margin-left: 200px;
+    flex: 1;
+    border: none;
+    border-radius: 5px;
 
 }
 
@@ -45,19 +47,39 @@ body{
     flex-grow: 1;
     margin-right: 10px;
 
-}
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
 
+}
+#message{
+    flex: 1;
+    border: none;
+    border-radius: 20px;
+    padding: 10px;
+    margin-right: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
 .chat-input button {
     background-color: #0077cc;
     border: none;
     color: #fff;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
+
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .chat-input button:hover {
     background-color: #005fa3;
+    cursor: pointer;
 }
 .info{
     font-weight: bold;
@@ -110,6 +132,7 @@ body{
     padding: 16px;
     border-radius: 5px;
     max-width: 93%;
+    clear: both;
 }
 .history{
     background-color: cornflowerblue;

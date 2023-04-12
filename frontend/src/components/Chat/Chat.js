@@ -84,8 +84,8 @@ export default function Chat() {
                 </div>
                 <div className="help_user">
                     <h4>Polecenia czatu </h4>
-                -Leczenie  //nazwa choroby// <br/>
-                -Choroby w //nazwa regionu// <br/>
+                -Leczenie: //nazwa choroby// <br/>
+                -Zachorowania: //nazwa regionu// <br/>
                 - Opisz //nazwa choroby//
                 </div>
         </div>

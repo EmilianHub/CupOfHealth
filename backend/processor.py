@@ -9,6 +9,7 @@ from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
 
 import diseaseCache
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from responsesJPA import Responses
@@ -51,7 +52,7 @@ def predict_class(sentence, model):
     # filter out predictions below a threshold
     p = bow(sentence, words, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.25
+    ERROR_THRESHOLD = 0.02
     results = [[i, r] for i, r in enumerate(res) if r > ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -67,6 +68,9 @@ def getResponse(ints, msg):
 
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag)
+        if tag.startswith("Leczenie") :
+            ss=showLeczenie(tag)
+            return ss
 
         return retrieveDisesaseResponse(ints, msg)
 
@@ -159,3 +163,11 @@ def saveUserDiseaseHistory(disease: str):
         userMsg = diseaseCache.user_msg
         return userService.saveDiseaseHistory(userMsg, disease, token)
     return None
+
+def showLeczenie(msg):
+
+        hh= msg.replace("Leczenie: ","")
+        ll = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(hh))
+
+        return db_session.scalars(ll).one_or_none()
+

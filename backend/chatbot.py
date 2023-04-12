@@ -1,3 +1,4 @@
+import pdb
 import pickle
 import random
 from collections import defaultdict
@@ -13,6 +14,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
 
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
@@ -31,6 +33,7 @@ ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam
 
 casualPatterns = db_session.scalars(select(Patterns)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
+
 groupedCasualPatterns = defaultdict(list)
 
 
@@ -57,8 +60,19 @@ for i in casualDiseases:
 
         documents.append((w, str(i.choroba)))
 
-        if i not in classes:
+        if i.choroba not in classes:
             classes.append(str(i.choroba))
+
+for p in casualDiseases:
+    l = nltk.word_tokenize(f"Jak leczyć {p.choroba}")
+    words.extend(l)
+    #pdb.set_trace()
+
+    documents.append((l, str(f"Leczenie: {p.choroba}")))
+
+    if f"Leczenie: {p.choroba}" not in classes:
+        classes.append(str(f"Leczenie: {p.choroba}"))
+
 
 words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
 words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]

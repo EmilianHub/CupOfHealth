@@ -1,4 +1,6 @@
+
 from dataclasses import dataclass
+
 
 from objawyJPA import Symptoms
 from dbConnection import engine, Base
@@ -27,10 +29,13 @@ class Diseases(Base):
 
     objawy: Mapped[List[Symptoms]] = relationship(secondary=association_table)
 
-    def __repr__(self) -> str:
+
+    def repr(self) -> str:
         return f"Diseases(id={self.id_choroba!r}, choroba={self.choroba!r}, objawy={self.objawy!r})"
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {c.name: getattr(self, c.name) for c in self.table.columns}
+
+
+
 
 Base.metadata.create_all(engine)
-
