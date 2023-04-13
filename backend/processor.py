@@ -10,7 +10,7 @@ from sqlalchemy import select
 import diseaseCache
 from chorobyJPA import Diseases
 from dbConnection import db_session
-from jwtService import decodeHeaderToken
+import jwtService
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
@@ -120,9 +120,11 @@ def retrieveDiseaseResponse(ints):
 def getResponseWithConfidance(confidenceKey, confidenceVaule):
     if confidenceVaule >= 0.6:
         saveUserDiseaseHistory(confidenceKey, confidenceVaule)
+        saveRegionDisease(confidenceKey)
         return findResponseWithTagGroup(TagGroup.disease)
     elif 0.6 > confidenceVaule > 0.3 or len(diseaseCache.user_msg) >= 3:
         saveUserDiseaseHistory(confidenceKey, confidenceVaule)
+        saveRegionDisease(confidenceKey)
         return findResponseWithTagGroup(TagGroup.question)
 
     return findResponseWithTagGroup(TagGroup.few_questions)
@@ -160,8 +162,15 @@ def chatbot_response(msg):
 
 
 def saveUserDiseaseHistory(disease: str, confidence: float):
-    token = decodeHeaderToken()
+    token = jwtService.decodeAuthorizationHeaderToken()
     if token:
         userMsg = diseaseCache.user_msg
-        return userService.saveDiseaseHistory(userMsg, disease, token, confidence)
-    return None
+        userService.saveDiseaseHistory(userMsg, disease, token, confidence)
+
+def saveRegionDisease(disease):
+    location = jwtService.decodeLocationHeader()
+    if location:
+        longitude = location.get("longitude")
+        latitude = location.get("latitude")
+        userService.saveRegionDisease(latitude, longitude, disease)
+

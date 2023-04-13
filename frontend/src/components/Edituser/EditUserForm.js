@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import axios, {HttpStatusCode} from 'axios';
 import "./EdiUserForm.css"
 import {jwtEncode} from "../JwtManager/JwtManager";
-import {getToken, setAuthorizationHeader} from "../CookiesManager/CookiesManager";
+import {setRequestHeader} from "../CookiesManager/CookiesManager";
 
 export default function VerifyForm() {
 
@@ -16,7 +16,7 @@ export default function VerifyForm() {
         const json = {
             password: password
         }
-        axios.post('http://localhost:5000/user/new_password', jwtEncode(json), setAuthorizationHeader()
+        axios.post('http://localhost:5000/user/new_password', jwtEncode(json), setRequestHeader()
         ).then((res) => {
             switch (res.status) {
                 case HttpStatusCode.Ok:
@@ -44,7 +44,7 @@ export default function VerifyForm() {
         const json = {
             newEmail: newemail
         }
-        axios.post('http://localhost:5000/user/edit_email', jwtEncode(json), setAuthorizationHeader()
+        axios.post('http://localhost:5000/user/edit_email', jwtEncode(json), setRequestHeader()
         ).then((res) => {
             switch (res.status) {
                 case HttpStatusCode.Ok:

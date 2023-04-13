@@ -8,7 +8,7 @@ from sqlalchemy import select, update, func, Interval
 
 import restartCodeCache as restartCodeCache
 import rsaEncryption
-from locJPA import Localization
+from localizationJPA import Localization
 from locationService import getCurrentLocation
 from chorobyJPA import Diseases
 from dbConnection import db_session
@@ -19,7 +19,7 @@ from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-TOKEN_EXPIRATION_OFFSET = 30
+TOKEN_EXPIRATION_OFFSET = 10
 
 
 class UserService:
@@ -143,28 +143,52 @@ class UserService:
         historyJPA = db_session.scalars(query).one_or_none()
 
         newHistoryJPA = UserDiseaseHistory(user=userJPA, user_symptoms=symtoms, disease=diseaseJPA,
-                                           confidence=confidence)
+                                           confidence=confidence, created=datetime.now())
         if historyJPA is not None:
             newHistoryJPA.id = historyJPA.id
+            newHistoryJPA.created = historyJPA.created
 
         db_session.merge(newHistoryJPA)
         db_session.commit()
 
-    def saveLocalization(self, latitude: str, longitude: str, choroba: str, email: str):
+    def saveRegionDisease(self, latitude: str, longitude: str, disease: str):
         try:
             location = getCurrentLocation(longitude, latitude)
-            query = select(Diseases).where(Diseases.choroba == choroba)
-            diseaseJPA = db_session.scalars(query).one()
-            userJPA = self.findUserWithEmail(email)
+            diseaseJPA = self.findDiseaseReferance(disease)
+            city = self.__findCityOrVillage(location["address"])
+            token = jwtService.decodeAuthorizationHeaderToken()
+            if token:
+                date = token.get("exp")
+                token = datetime.utcfromtimestamp(date)
+            else:
+                token = jwtService.getSessionToken()
 
-            locJPA = Localization(woj=location["address"]["state"], miasto=location["address"]["city"], choroba=diseaseJPA, user=userJPA)
-            db_session.add(locJPA)
-            db_session.commit()
+            self.mergeRegionHistory(location, city, diseaseJPA, token)
+
             return "Disease localization saved"
         except Exception as error:
             print(error)
 
         return "Disease localization not saved"
+
+    def mergeRegionHistory(self, location, city, diseaseJPA, token):
+        query = select(Localization).where(Localization.session_token == token)
+        locationJPA = db_session.scalars(query).one_or_none()
+
+        newLocalizationJPA = Localization(woj=location["address"]["state"], miasto=city, choroba=diseaseJPA,
+                                          session_token=token, created=datetime.now())
+
+        if locationJPA:
+            newLocalizationJPA.id_loc = locationJPA.id_loc
+            newLocalizationJPA.created = locationJPA.created
+
+        db_session.merge(newLocalizationJPA)
+        db_session.commit()
+
+    def __findCityOrVillage(self, address):
+        for k, v in address.items():
+            if k == "city" or k == "village":
+                return v
 
     def editEmail(self, email: str, newEmail: str):
         try:
