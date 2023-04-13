@@ -19,8 +19,7 @@ from userJPA import User
 
 emailService = EmailService()
 passwordRegex = re.compile("^(?=.*[0-9!@#$%^&+=])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$")
-TOKEN_EXPIRATION_OFFSET = 30
-SHORT_SESSION_OFFSET = 10
+TOKEN_EXPIRATION_OFFSET = 10
 
 
 class UserService:
@@ -156,24 +155,35 @@ class UserService:
         try:
             location = getCurrentLocation(longitude, latitude)
             diseaseJPA = self.findDiseaseReferance(disease)
-            query = select(Localization).where(
-                Localization.created + func.cast(timedelta(minutes=SHORT_SESSION_OFFSET),
-                                                 Interval) >= datetime.now())
-            locationJPA = db_session.scalars(query).one_or_none()
             city = self.__findCityOrVillage(location["address"])
+            token = jwtService.decodeAuthorizationHeaderToken()
+            if token:
+                date = token.get("exp")
+                token = datetime.utcfromtimestamp(date)
+            else:
+                token = jwtService.getSessionToken()
 
-            newLocalizationJPA = Localization(woj=location["address"]["state"], miasto=city, choroba=diseaseJPA)
+            self.mergeRegionHistory(location, city, diseaseJPA, token)
 
-            if locationJPA:
-                newLocalizationJPA.id_loc = locationJPA.id_loc
-
-            db_session.merge(newLocalizationJPA)
-            db_session.commit()
             return "Disease localization saved"
         except Exception as error:
             print(error)
 
         return "Disease localization not saved"
+
+    def mergeRegionHistory(self, location, city, diseaseJPA, token):
+        query = select(Localization).where(Localization.session_token == token)
+        locationJPA = db_session.scalars(query).one_or_none()
+
+        newLocalizationJPA = Localization(woj=location["address"]["state"], miasto=city, choroba=diseaseJPA,
+                                          session_token=token, created=datetime.now())
+
+        if locationJPA:
+            newLocalizationJPA.id_loc = locationJPA.id_loc
+            newLocalizationJPA.created = locationJPA.created
+
+        db_session.merge(newLocalizationJPA)
+        db_session.commit()
 
     def __findCityOrVillage(self, address):
         for k, v in address.items():

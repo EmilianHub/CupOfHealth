@@ -17,6 +17,7 @@ class Localization(Base):
     miasto: Mapped[str] = mapped_column(nullable=True)
     choroba_id: Mapped[int] = mapped_column(ForeignKey(Diseases.id_choroba))
     choroba: Mapped[Diseases] = relationship()
+    session_token: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False)
     created: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.now())
 
 

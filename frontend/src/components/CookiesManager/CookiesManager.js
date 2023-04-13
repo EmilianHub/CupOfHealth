@@ -1,5 +1,11 @@
-export function getToken() {
-    return localStorage.getItem("token")
+import {format} from "date-fns";
+
+export function getUserToken() {
+    return localStorage.getItem("userToken")
+}
+
+export function setUserToken(token) {
+    localStorage.setItem("userToken", token)
 }
 
 export function deleteToken() {
@@ -11,14 +17,16 @@ export function setRequestHeader() {
     if (location !== null) {
         return {
             headers: {
-                "Authorization": getToken(),
-                "Location": location
+                "Authorization": getUserToken(),
+                "Location": location,
+                "SessionToken": getSessionToken()
             }
         }
     }
     return {
         headers: {
-            "Authorization": getToken()
+            "Authorization": getUserToken(),
+            "SessionToken": getSessionToken()
         }
     }
 }
@@ -27,3 +35,10 @@ export function getLocation() {
     return localStorage.getItem("location")
 }
 
+export function setSessionToken() {
+    localStorage.setItem("sessionToken", format(new Date(), 'yyyy-MM-dd HH:mm:ss'))
+}
+
+export function getSessionToken() {
+    return localStorage.getItem("sessionToken")
+}
