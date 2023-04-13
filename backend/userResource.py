@@ -29,7 +29,7 @@ def updatePassword():
     args = jwtService.decodeRequest(request.get_data())
     email = args.get("email")
     if email is None:
-        email = jwtService.decodeHeaderToken().get("email")
+        email = jwtService.decodeAuthorizationHeaderToken().get("email")
     password = args.get("password")
     return userService.updatePassword(email, password)
 
@@ -37,7 +37,7 @@ def updatePassword():
 @user.post("/edit_email")
 def edit_email():
     args = jwtService.decodeRequest(request.get_data())
-    email = jwtService.decodeHeaderToken().get("email")
+    email = jwtService.decodeAuthorizationHeaderToken().get("email")
     newEmail = args.get("newEmail")
     return userService.editEmail(email, newEmail)
 
@@ -49,7 +49,7 @@ def saveLocalization():
     miasto = args.get("long")
     choroba = args.get("choroba")
     email = args.get("email")
-    return userService.saveLocalization(woj, miasto, choroba, email)
+    return userService.saveRegionDisease(woj, miasto, choroba, email)
 
 
 @user.post("/register")

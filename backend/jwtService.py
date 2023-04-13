@@ -14,10 +14,17 @@ def generateToken(email):
                       algorithm='HS256')
 
 
-def decodeHeaderToken():
+def decodeAuthorizationHeaderToken():
     token = request.headers.get('Authorization')
     if token:
         return decodeRequest(token)
+    return None
+
+
+def decodeLocationHeader():
+    location = request.headers.get("Location")
+    if location:
+        return decodeRequest(location)
     return None
 
 
