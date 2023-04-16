@@ -9,10 +9,12 @@ import {getUserToken, setRequestHeader} from "../CookiesManager/CookiesManager";
 export default function Chat() {
     const [question, setQuestion] = useState("")
     const [data, setData] = useState([])
+    const [userHistory, setUserHistory] =  useState([])
     const navigate = useNavigate();
     let isLoggedIn = getUserToken() !== null
+
     useEffect(() =>{
-        FindUserHistory()
+        findUserHistory()
     }, [])
 
     function sendMessage() {
@@ -40,7 +42,7 @@ export default function Chat() {
 
     function HandelEdit(id){
         // eslint-disable-next-line array-callback-return
-        userHisotry.map((val, key) => {
+        userHistory.map((val, key) => {
 
             if(val.id === id)
             {
@@ -50,16 +52,16 @@ export default function Chat() {
             }
         })
     }
-    const [userHisotry, setUserHisotry] =  useState([])
-    function FindUserHistory(){
-        if (isLoggedIn  && userHisotry.length == 0){
+
+    function findUserHistory(){
+        if (isLoggedIn  && userHistory.length == 0){
             axios.get('http://localhost:5000/user/user_history', setRequestHeader())
                 .then((result )=> {
-                    setUserHisotry(result.data)
+                    setUserHistory(result.data)
                     console.log(result.data)
             })
         }
-        console.log(userHisotry)
+        console.log(userHistory)
     }
 
     return (
@@ -97,7 +99,7 @@ export default function Chat() {
             <div className="history">
                 <div className="history_user">
                  <h4>Twoje diagnozy</h4>
-                    { isLoggedIn ?  ( <div> {userHisotry.map(row =>(
+                    { isLoggedIn ?  ( <div> {userHistory.map(row =>(
                         <div onClick={()=>HandelEdit(row.id)}> {row.Choroba}  </div>
                     ))} </div> ) : (
                         <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
