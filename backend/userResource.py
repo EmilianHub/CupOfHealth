@@ -1,27 +1,24 @@
-import hashlib
 from functools import wraps
 
 from flask import Blueprint, request, jsonify
 
 import jwtService
-from jwtService import generateToken
 from userService import UserService
 
 user = Blueprint("user", __name__)
 
 userService = UserService()
 
-
 @user.post("/send_code")
 def sendRestartCode():
-    args = request.get_json()
+    args = jwtService.decodeRequest(request.get_data())
     email = args.get("email")
     return userService.sendRestartCodeToEmail(email)
 
 
 @user.post("/verify_code")
 def verifyRestartCode():
-    args = request.get_json()
+    args = jwtService.decodeRequest(request.get_data())
     email = args.get("email")
     code = args.get("code")
     return userService.verifyRestartCode(email, code)
@@ -29,15 +26,35 @@ def verifyRestartCode():
 
 @user.post("/new_password")
 def updatePassword():
-    args = request.get_json()
+    args = jwtService.decodeRequest(request.get_data())
     email = args.get("email")
+    if email is None:
+        email = jwtService.decodeAuthorizationHeaderToken().get("email")
     password = args.get("password")
     return userService.updatePassword(email, password)
 
 
+@user.post("/edit_email")
+def edit_email():
+    args = jwtService.decodeRequest(request.get_data())
+    email = jwtService.decodeAuthorizationHeaderToken().get("email")
+    newEmail = args.get("newEmail")
+    return userService.editEmail(email, newEmail)
+
+
+@user.post('/save_localization')
+def saveLocalization():
+    args = jwtService.decodeRequest(request.get_data())
+    woj = args.get("lat")
+    miasto = args.get("long")
+    choroba = args.get("choroba")
+    email = args.get("email")
+    return userService.saveRegionDisease(woj, miasto, choroba, email)
+
+
 @user.post("/register")
 def register():
-    args = request.get_json()
+    args = jwtService.decodeRequest(request.get_data())
     email = args.get("email")
     password = args.get("password")
     return userService.register(email, password)
@@ -45,16 +62,10 @@ def register():
 
 @user.post("/sign_in")
 def login():
-    args = request.get_data()
-    req = jwtService.decodeRequest(args)
+    req = jwtService.decodeRequest(request.get_data())
     email = req.get('email')
     password = req.get('password')
-    user = userService.findUserWithEmail(email)
-    if hashlib.sha256(password.encode('utf-8')).hexdigest() == user.password:
-        token = generateToken(user.email)
-        return jsonify({'token': token}), 200
-    else:
-        return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
+    return userService.tryLogin(email, password)
 
 
 def token_required(f):
@@ -67,7 +78,8 @@ def token_required(f):
             isAuthenticated = userService.verifyAuthentication(token)
             if not isAuthenticated:
                 return "Invalid Token", 401
-        except:
+        except BaseException as e:
+            print(e)
             return jsonify({'error': 'Nieprawidłowy token'}), 401
         return f(*args)
     return decorated

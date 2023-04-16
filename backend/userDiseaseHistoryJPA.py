@@ -1,5 +1,6 @@
-import datetime
+
 from dataclasses import dataclass
+from datetime import datetime
 
 from userJPA import User
 from chorobyJPA import Diseases
@@ -19,7 +20,8 @@ class UserDiseaseHistory(Base):
     user_symptoms: Mapped[bytes] = mapped_column(unique=False, nullable=False)
     disease_id: Mapped[int] = mapped_column(ForeignKey(Diseases.id_choroba))
     disease: Mapped[Diseases] = relationship()
-    created: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.datetime.now())
+    created: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False, default=datetime.now())
+    confidence: Mapped[float] = mapped_column(nullable=False)
 
     def __repr__(self) -> str:
         return f"UserDiseaseHistory(id={self.id!r}, user={self.user!r}, userSymptoms={self.user_symptoms!r}, disease={self.disease!r})"

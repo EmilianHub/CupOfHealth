@@ -1,17 +1,13 @@
 import pdb
 import pickle
 import random
-from collections import defaultdict
-import spacy
-from spacy.lang.pl.examples import sentences
-import nltk
+
 import numpy as np
+import spacy
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
-from nltk.corpus import wordnet as wn
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
 from tagGroup import TagGroup
@@ -20,50 +16,50 @@ from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
 
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('stopwords')
-nltk.download('pl196x')
-nltk.download('cess_esp')
-lemmatizer = WordNetLemmatizer()
-
+nlp = spacy.load("pl_core_news_md")
 words = []
 classes = []
 documents = []
-ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam", "dla", "w", "o", "z", "pod", "nad"]
+
+ignore_words = nlp.Defaults.stop_words
+ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
 casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
-leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
-
 groupedCasualPatterns = defaultdict(list)
-
-
-
+leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
 for i in casualPatterns:
     groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
 
-for k, v in groupedCasualPatterns.items():
-    for pattern in v:
 
-        w = nltk.word_tokenize(str(pattern))
-        words.extend(w)
+for pattern in casualPatterns:
+    tokenizedWord = nlp(pattern.pattern)
+    pattern_words = [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
 
-        documents.append((w, str(k)))
+    words.extend(pattern_words)
+    documents.append((pattern_words, str(pattern.pattern_group.value)))
 
-        if k not in classes:
-            classes.append(str(k))
+    if str(pattern.pattern_group.value) not in classes:
+        classes.append(str(pattern.pattern_group.value))
 
+for disease in casualDiseases:
+    for symptom in disease.objawy:
+        tokenizedWord = nlp(symptom.objawy)
+        symptom_words = [symptom.objawy]
+        symptom_words += [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+        symptom_words += [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
 
-for i in casualDiseases:
-    for j in i.objawy:
-        w = nltk.word_tokenize(str(j.objawy))
-        words.extend(w)
+        words.extend(symptom_words)
+        documents.append((symptom_words, str(disease.choroba)))
 
-        documents.append((w, str(i.choroba)))
+        if str(disease.choroba) not in classes:
+            classes.append(str(disease.choroba))
 
-        if i.choroba not in classes:
-            classes.append(str(i.choroba))
+for sentence in sentences:
+    doc = nlp(sentence)
+    for token in doc:
+        if token.lemma_.lower() not in words and ignore_words:
+            words.append(token.lemma_.lower())
 
 for p in casualDiseases:
     for pattern in leczeniePatterns:
@@ -77,15 +73,7 @@ for p in casualDiseases:
             classes.append(str(f"leczenie: {p.choroba}"))
 
 
-words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]
-words += [lemmatizer.lemmatize(w.lower(), wn.ADV) for w in words if w not in ignore_words]
-words += [lemmatizer.lemmatize(w.lower(), wn.ADJ_SAT) for w in words if w not in ignore_words]
-
-
 words = sorted(list(set(words)))
-
-
-
 classes = sorted(list(set(classes)))
 
 print(len(documents), "documents")
@@ -100,17 +88,16 @@ pickle.dump(classes, open('classes.pkl', 'wb'))
 # initializing training data
 training = []
 output_empty = [0] * len(classes)
-nlp = spacy.load("pl_core_news_sm")
-doc = nlp(sentences[0])
-
 for doc in documents:
-
     bag = []
     pattern_words = doc[0]
-    pattern_words = [lemmatizer.lemmatize(word.lower()) for word in pattern_words]
+    temp = []
+    for word in pattern_words:
+        tokenizedWord = nlp(word)
+        temp.extend([token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
 
     for w in words:
-        bag.append(1) if w in pattern_words else bag.append(0)
+        bag.append(1) if w in temp else bag.append(0)
 
     output_row = list(output_empty)
     output_row[classes.index(doc[1])] = 1
@@ -118,7 +105,7 @@ for doc in documents:
     training.append([bag, output_row])
 
 random.shuffle(training)
-training = np.array(training)
+training = np.array(training, dtype=object)
 # create train and test lists. X - patterns, Y - intents
 train_x = list(training[:, 0])
 train_y = list(training[:, 1])
@@ -140,5 +127,4 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy
 # fitting and saving the model
 hist = model.fit(np.array(train_x), np.array(train_y), epochs=200, batch_size=5, verbose=1)
 model.save('chatbot_model.h5', hist)
-
 print("model created")

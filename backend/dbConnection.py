@@ -1,8 +1,9 @@
-import sqlalchemy
-from sqlalchemy.orm import scoped_session, sessionmaker, Session
-from sqlalchemy.ext.declarative import declarative_base
 import os
+
+import sqlalchemy
 from dotenv import load_dotenv
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 load_dotenv()
 

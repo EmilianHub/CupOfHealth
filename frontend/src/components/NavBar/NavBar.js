@@ -2,16 +2,14 @@ import React, {useState, useEffect} from 'react';
 import {NavBarData, NavBarDataUser} from "./NavBarData";
 import {Link, useLocation} from "react-router-dom";
 import "./NavBar.css"
-import {HttpStatusCode} from "axios";
-import {readCookie} from "../CookiesManager/CookiesManager"
+import {getUserToken} from "../CookiesManager/CookiesManager"
 
 const Navbar = () => {
     const [navBar, setNavBar] = useState([]);
     const location = useLocation();
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (token !== null) {
+        if (getUserToken() !== null) {
             setNavBar(NavBarDataUser)
         } else {
             setNavBar(NavBarData)

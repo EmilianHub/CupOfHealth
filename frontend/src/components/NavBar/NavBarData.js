@@ -1,4 +1,5 @@
 import jwtDecode from "jwt-decode";
+import {getUserToken} from "../CookiesManager/CookiesManager";
 
 export const NavBarData = [
     {
@@ -15,10 +16,10 @@ export const NavBarData = [
 
         link: "/sign_in",
     }
-    ];
+];
 
-function getUserEmail(){
-    const token = localStorage.getItem("token")
+function getUserEmail() {
+    const token = getUserToken()
     if (token !== null) {
         let tokenDecoded = jwtDecode(token)
         return tokenDecoded.email
@@ -32,11 +33,12 @@ export const NavBarDataUser = [
         link: "/"
     },
     {
-      name: getUserEmail(),
+        name: getUserEmail(),
+        link: "/edit_user"
     },
     {
         name: "Wyloguj",
 
         link: "/logout",
     }
-    ];
+];

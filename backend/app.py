@@ -1,5 +1,4 @@
 from flask import Flask, request
-from flask import render_template
 from flask_cors import CORS
 
 import processor
@@ -16,11 +15,6 @@ app.register_blueprint(location, url_prefix="/location")
 CORS(app)
 
 
-@app.route('/', methods=["GET", "POST"])
-def index():
-    return render_template('index.html', **locals())
-
-
 @app.post('/chatbot')
 def chatbotResponse():
     arg = request.get_data()
@@ -32,4 +26,4 @@ def chatbotResponse():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, host="0.0.0.0")

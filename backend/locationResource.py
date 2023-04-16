@@ -1,11 +1,12 @@
 from flask import Blueprint, request
 from locationService import getCurrentLocation
+import jwtService
 location = Blueprint("location", __name__)
 
 
 @location.post("/")
 def retrieveCurrentLocation():
-    data = request.get_json()
+    data = jwtService.decodeRequest(request.get_data())
     long = data.get("longitude")
-    latit = data.get("latitude")
-    return getCurrentLocation(long, latit)
+    latitude = data.get("latitude")
+    return jwtService.encodeResponse(getCurrentLocation(long, latitude))

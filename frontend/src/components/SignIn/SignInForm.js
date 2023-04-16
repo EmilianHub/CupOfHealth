@@ -3,7 +3,7 @@ import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
 import {useNavigate} from "react-router-dom";
 import {Link} from 'react-router-dom';
-import {setAuthorizationHeader} from "../CookiesManager/CookiesManager";
+import {setRequestHeader, setUserToken} from "../CookiesManager/CookiesManager";
 import {jwtEncode} from "../JwtManager/JwtManager";
 
 export default function SignInForm() {
@@ -20,7 +20,7 @@ export default function SignInForm() {
         axios.post("http://localhost:5000/user/sign_in", jwtEncode(json)
         ).then((response) => {
             if (response.status === HttpStatusCode.Ok) {
-                localStorage.setItem('token', response.data.token);
+                setUserToken(response.data.token)
                 navigate("/");
                 window.location.reload();
                 localStorage.setItem('isLoggedIn', true);

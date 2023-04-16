@@ -9,15 +9,26 @@ SECRET_KEY = 'secret'
 def generateToken(email):
     # generowanie tokena JWT
     return jwt.encode({'email': email,
-                       "exp": datetime.now() + timedelta(minutes=30)},
+                       "exp": datetime.now() + timedelta(minutes=10)},
                       SECRET_KEY,
                       algorithm='HS256')
 
 
-def decodeHeaderToken():
+def getSessionToken():
+    return request.headers.get("SessionToken")
+
+
+def decodeAuthorizationHeaderToken():
     token = request.headers.get('Authorization')
     if token:
         return decodeRequest(token)
+    return None
+
+
+def decodeLocationHeader():
+    location = request.headers.get("Location")
+    if location:
+        return decodeRequest(location)
     return None
 
 

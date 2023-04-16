@@ -1,16 +1,15 @@
-
 from dataclasses import dataclass
+from typing import List
 
-
-from objawyJPA import Symptoms
-from dbConnection import engine, Base
-from sqlalchemy.orm import Mapped, synonym
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import Table
+from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from typing import List
-from sqlalchemy import Column
-from sqlalchemy import Table
-from sqlalchemy import ForeignKey
+
+from dbConnection import engine, Base
+from objawyJPA import Symptoms
 
 association_table = Table(
     "objawy_to_choroba",
@@ -29,13 +28,10 @@ class Diseases(Base):
 
     objawy: Mapped[List[Symptoms]] = relationship(secondary=association_table)
 
-
-    def repr(self) -> str:
+    def __repr__(self) -> str:
         return f"Diseases(id={self.id_choroba!r}, choroba={self.choroba!r}, objawy={self.objawy!r})"
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.table.columns}
-
-
-
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 Base.metadata.create_all(engine)
+
