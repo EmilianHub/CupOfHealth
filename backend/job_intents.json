@@ -23,6 +23,11 @@
     {"tag": "źle się czuję",
       "patterns": ["Źle się czuję", "Nie czuję się najlepiej"],
       "responses": ["Podaj mi swoje objawy.", "Powiedz co się dzieje."]
+    },
+    {
+      "tag": "Leczenie",
+      "patterns": ["Leczenie ","Jak moge wyleczyć " , "Jak sobie radzić ","Co pomoże wyleczyć ", "W jaki sposób wyleczę ", "Jak leczyć ", "Co zrobić gdy mam"],
+      "response": []
     }
   ]
 }

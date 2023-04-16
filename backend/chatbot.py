@@ -14,6 +14,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sqlalchemy import select
 
+from tagGroup import TagGroup
 from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
@@ -31,8 +32,9 @@ classes = []
 documents = []
 ignore_words = ['?', '!', ",", ">", "<", "``", "''", "z", "i", "w", "się", "mam", "dla", "w", "o", "z", "pod", "nad"]
 
-casualPatterns = db_session.scalars(select(Patterns)).fetchall()
+casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
+leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
 
 groupedCasualPatterns = defaultdict(list)
 
@@ -64,14 +66,15 @@ for i in casualDiseases:
             classes.append(str(i.choroba))
 
 for p in casualDiseases:
-    l = nltk.word_tokenize(f"Jak leczyć {p.choroba}")
-    words.extend(l)
-    #pdb.set_trace()
+    for pattern in leczeniePatterns:
+        l = nltk.word_tokenize(f"{pattern.pattern} {p.choroba}")
+        words.extend(l)
+        pdb.set_trace()
 
-    documents.append((l, str(f"Leczenie: {p.choroba}")))
+        documents.append((l, str(f"leczenie: {p.choroba}")))
 
-    if f"Leczenie: {p.choroba}" not in classes:
-        classes.append(str(f"Leczenie: {p.choroba}"))
+        if f"leczenie: {p.choroba}" not in classes:
+            classes.append(str(f"leczenie: {p.choroba}"))
 
 
 words = [lemmatizer.lemmatize(w.lower(), wn.ADJ) for w in words if w not in ignore_words]

@@ -68,7 +68,7 @@ def getResponse(ints, msg):
 
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag)
-        if tag.startswith("Leczenie") :
+        if tag.startswith("leczenie") :
             ss=showLeczenie(tag)
             return ss
 
@@ -84,6 +84,8 @@ def isCasualResponse(tag):
 
 
 def retrieveCausalResponse(tag):
+
+
     response = findResponseWithTagGroup(tag)
 
     if response is not None:
@@ -166,7 +168,7 @@ def saveUserDiseaseHistory(disease: str):
 
 def showLeczenie(msg):
 
-        hh= msg.replace("Leczenie: ","")
+        hh= msg.replace("leczenie: ","")
         ll = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(hh))
 
         return db_session.scalars(ll).one_or_none()
