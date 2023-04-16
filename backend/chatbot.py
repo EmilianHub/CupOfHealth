@@ -1,4 +1,3 @@
-import pdb
 import pickle
 import random
 
@@ -15,6 +14,7 @@ from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
+from tagGroup import TagGroup
 
 nlp = spacy.load("pl_core_news_md")
 words = []

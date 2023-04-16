@@ -13,7 +13,7 @@ class TagGroup(enum.Enum):
     specify = "specify"
     few_questions = "few_questions"
     leczenie = "leczenie"
-    end_diagnosis = 'end_diagnosis'
+    end_diagnosis = "end_diagnosis"
 
     @staticmethod
     def fetch_names():
