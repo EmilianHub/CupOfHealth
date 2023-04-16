@@ -12,6 +12,7 @@ class TagGroup(enum.Enum):
     mood = "mood"
     specify = "specify"
     few_questions = "few_questions"
+    leczenie = "leczenie"
     end_diagnosis = "end_diagnosis"
 
     @staticmethod

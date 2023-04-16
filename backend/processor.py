@@ -68,6 +68,9 @@ def getResponse(ints, msg):
 
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag)
+        if tag.startswith("leczenie") :
+            ss=showLeczenie(tag)
+            return ss
 
         return retrieveDisesaseResponse(ints, msg)
 
@@ -178,4 +181,12 @@ def saveRegionDisease(disease):
         longitude = location.get("longitude")
         latitude = location.get("latitude")
         userService.saveRegionDisease(latitude, longitude, disease)
+
+
+def showLeczenie(msg):
+
+        hh= msg.replace("leczenie: ","")
+        ll = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(hh))
+
+        return db_session.scalars(ll).one_or_none()
 
