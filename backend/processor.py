@@ -8,6 +8,7 @@ from keras.models import load_model
 from sqlalchemy import select
 
 import diseaseCache
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 import jwtService
@@ -52,7 +53,7 @@ def predict_class(sentence):
     # filter out predictions below a threshold
     p = bow(sentence, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.2
+    ERROR_THRESHOLD = 0.02
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -68,6 +69,9 @@ def getResponse(ints, msg):
 
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag)
+        if tag.startswith("leczenie") :
+            ss=showLeczenie(tag)
+            return ss
 
         return retrieveDisesaseResponse(ints, msg)
 
@@ -173,4 +177,12 @@ def saveRegionDisease(disease):
         longitude = location.get("longitude")
         latitude = location.get("latitude")
         userService.saveRegionDisease(latitude, longitude, disease)
+
+
+def showLeczenie(msg):
+
+        hh= msg.replace("leczenie: ","")
+        ll = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(hh))
+
+        return db_session.scalars(ll).one_or_none()
 
