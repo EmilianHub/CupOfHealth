@@ -1,4 +1,3 @@
-import pdb
 import pickle
 import random
 
@@ -10,11 +9,10 @@ from keras.optimizers import SGD
 from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
-from tagGroup import TagGroup
-from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
+from tagGroup import TagGroup
 
 nlp = spacy.load("pl_core_news_md")
 words = []

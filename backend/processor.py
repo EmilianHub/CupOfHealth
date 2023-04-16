@@ -8,6 +8,7 @@ from keras.models import load_model
 from sqlalchemy import select
 
 import diseaseCache
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 import jwtService
