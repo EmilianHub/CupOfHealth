@@ -9,6 +9,8 @@ from keras.optimizers import SGD
 from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
+from tagGroup import TagGroup
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns

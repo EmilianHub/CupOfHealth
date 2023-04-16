@@ -203,3 +203,18 @@ class UserService:
             print("Error occurred while updating user: ", error)
 
         return "Something gone wrong. email has not been updated", 400
+
+    def findUserHistory(self, email):
+        try:
+            query = select(UserDiseaseHistory).join(UserDiseaseHistory.user).where(User.email.ilike(email))
+            result = db_session.scalars(query).fetchall()
+            if result:
+                return [{"Objawy" : rsaEncryption.decrypt(r.user_symptoms),
+                "Choroba" : r.disease.choroba,
+                         "id" : r.id,
+                         "created" : r.created} for r in result]
+            return "Brak hisotrii"
+        except Exception as error:
+            print("Error occurred while updating user: ", error)
+
+        return "Brak historii"

@@ -1,15 +1,19 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom';
 import "./Chat.css"
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
 import {decodeJwt, jwtEncode} from "../JwtManager/JwtManager";
-import {setAuthorizationHeader, setRequestHeader} from "../CookiesManager/CookiesManager";
+import {getUserToken, setRequestHeader} from "../CookiesManager/CookiesManager";
 
 export default function Chat() {
     const [question, setQuestion] = useState("")
     const [data, setData] = useState([])
     const navigate = useNavigate();
+    let isLoggedIn = getUserToken() !== null
+    useEffect(() =>{
+        FindUserHistory()
+    }, [])
 
     function sendMessage() {
         data.push({"user": question})
@@ -32,13 +36,31 @@ export default function Chat() {
             sendMessage();
         }
     };
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn === 'true') {
-            // użytkownik jest zalogowany
-    } else {
-        // użytkownik nie jest zalogowany
-    }
 
+
+    function HandelEdit(id){
+        // eslint-disable-next-line array-callback-return
+        userHisotry.map((val, key) => {
+
+            if(val.id === id)
+            {
+                data.push({"response":"Twoje objawy: " + val.Objawy + " \n Twoja choroba " + val.Choroba})
+                navigate('/', {replace: true})
+                document.getElementById('message').value = '';
+            }
+        })
+    }
+    const [userHisotry, setUserHisotry] =  useState([])
+    function FindUserHistory(){
+        if (isLoggedIn  && userHisotry.length == 0){
+            axios.get('http://localhost:5000/user/user_history', setRequestHeader())
+                .then((result )=> {
+                    setUserHisotry(result.data)
+                    console.log(result.data)
+            })
+        }
+        console.log(userHisotry)
+    }
 
     return (
         <body>
@@ -75,7 +97,9 @@ export default function Chat() {
             <div className="history">
                 <div className="history_user">
                  <h4>Twoje diagnozy</h4>
-                    { isLoggedIn ?  ( <div> Your disease history </div> ) : (
+                    { isLoggedIn ?  ( <div> {userHisotry.map(row =>(
+                        <div onClick={()=>HandelEdit(row.id)}> {row.Choroba}  </div>
+                    ))} </div> ) : (
                         <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
                             to="/sign_in">Zaloguj się</Link><br/>
                             lub <Link to="/register">Utwórz konto</Link>

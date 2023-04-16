@@ -88,3 +88,10 @@ def token_required(f):
 @token_required
 def protected():
     return jsonify({'message': 'Token JWT czuwa.'}), 200
+
+@user.get('/user_history')
+def get_user_history():
+    token = jwtService.decodeAuthorizationHeaderToken()
+    if token:
+        result = userService.findUserHistory(token.get("email"))
+        return jsonify(result)
