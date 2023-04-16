@@ -26,10 +26,8 @@ ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
 casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
-groupedCasualPatterns = defaultdict(list)
 leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
-for i in casualPatterns:
-    groupedCasualPatterns[i.pattern_group.value].append(i.pattern)
+
 
 
 for pattern in casualPatterns:
@@ -63,9 +61,11 @@ for sentence in sentences:
 
 for p in casualDiseases:
     for pattern in leczeniePatterns:
-        l = nltk.word_tokenize(f"{pattern.pattern} {p.choroba}")
+        tokenizedWord = nlp(f"{pattern.pattern} {p.choroba}")
+        l = [token.text for token in tokenizedWord if token.text.lower() not in ignore_words]
+        l += [token.lemma_ for token in tokenizedWord if token.text.lower() not in ignore_words]
         words.extend(l)
-        pdb.set_trace()
+        #pdb.set_trace()
 
         documents.append((l, str(f"leczenie: {p.choroba}")))
 

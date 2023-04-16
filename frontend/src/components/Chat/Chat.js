@@ -4,7 +4,7 @@ import "./Chat.css"
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
 import {decodeJwt, jwtEncode} from "../JwtManager/JwtManager";
-import {setAuthorizationHeader} from "../CookiesManager/CookiesManager";
+import {setAuthorizationHeader, setRequestHeader} from "../CookiesManager/CookiesManager";
 
 export default function Chat() {
     const [question, setQuestion] = useState("")
@@ -16,7 +16,7 @@ export default function Chat() {
         const json = {
             question: question
         }
-        axios.post("http://localhost:5000/chatbot", jwtEncode(json), setAuthorizationHeader())
+        axios.post("http://localhost:5000/chatbot", jwtEncode(json), setRequestHeader())
             .then((response) => {
                 data.push(decodeJwt(response.data))
                 navigate('/', {replace: true})
