@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from sqlalchemy import Column
+from sqlalchemy import Column, Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Table
 from sqlalchemy.orm import Mapped
@@ -26,7 +26,7 @@ class Responses(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     response: Mapped[str] = mapped_column(nullable=True)
-    response_group: Mapped[TagGroup] = mapped_column(nullable=False)
+    response_group = Column(Enum(TagGroup, name="tag_group"))
 
     pattern: Mapped[List[Patterns]] = relationship(secondary=association_table)
 
