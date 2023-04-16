@@ -150,7 +150,7 @@ def calculateConfidence(occurrences, ints):
         pDiseaseQuery = select(Diseases).where(Diseases.choroba.ilike(k.lower()))
         symptomsAmount = db_session.scalars(pDiseaseQuery).one_or_none()
         if symptomsAmount is None:
-            confidence[k] = 0
+            confidence[k] = [0, 0]
         else:
             if ints is not None and ints[0]['intent'] == k:
                 chatbotProbability = v/len(symptomsAmount.objawy) + float(ints[0]['probability'])
