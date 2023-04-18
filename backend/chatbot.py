@@ -1,4 +1,3 @@
-import pdb
 import pickle
 import random
 
@@ -10,9 +9,12 @@ from keras.optimizers import SGD
 from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
+from tagGroup import TagGroup
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
+from tagGroup import TagGroup
 
 nlp = spacy.load("pl_core_news_md")
 words = []
@@ -22,8 +24,10 @@ documents = []
 ignore_words = nlp.Defaults.stop_words
 ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
-casualPatterns = db_session.scalars(select(Patterns)).fetchall()
+casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
+leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
+
 
 
 for pattern in casualPatterns:
@@ -67,6 +71,19 @@ for sentence in sentences:
     for token in doc:
         if token.lemma_.lower() not in words and ignore_words:
             words.append(token.lemma_.lower())
+
+for p in casualDiseases:
+    for pattern in leczeniePatterns:
+        tokenizedWord = nlp(f"{pattern.pattern} {p.choroba}")
+        l = [token.text for token in tokenizedWord if token.text.lower() not in ignore_words]
+        l += [token.lemma_ for token in tokenizedWord if token.text.lower() not in ignore_words]
+        words.extend(l)
+        #pdb.set_trace()
+
+        documents.append((l, str(f"leczenie: {p.choroba}")))
+
+        if f"leczenie: {p.choroba}" not in classes:
+            classes.append(str(f"leczenie: {p.choroba}"))
 
 
 words = sorted(list(set(words)))

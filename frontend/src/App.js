@@ -8,6 +8,7 @@ import SignInPage from "./pages/SignInPage";
 import Navbar from "./components/NavBar/NavBar";
 import Logout from "./components/SignIn/Logout";
 import AuthVerify from "./components/JwtManager/AuthVerification";
+import EditUserPage from "./pages/EditUserPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Routes>
               <Route path="/" element={<ChatPage/>} />
               <Route path="/sign_in" element={<SignInPage/>}/>
+              <Route path="/edit_user" element={<EditUserPage/>}/>
               <Route path="/register" element={<RegisterPage/>}/>
               <Route path="/remind" element={<RemindPassPage/>}/>
               <Route path="/verify" element={<VerifyPage/>}/>

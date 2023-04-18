@@ -3,7 +3,7 @@ import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
 import {useNavigate} from "react-router-dom";
 import {Link} from 'react-router-dom';
-import {setAuthorizationHeader} from "../CookiesManager/CookiesManager";
+import {setRequestHeader, setUserToken} from "../CookiesManager/CookiesManager";
 import {jwtEncode} from "../JwtManager/JwtManager";
 
 export default function SignInForm() {
@@ -20,9 +20,10 @@ export default function SignInForm() {
         axios.post("http://localhost:5000/user/sign_in", jwtEncode(json)
         ).then((response) => {
             if (response.status === HttpStatusCode.Ok) {
-                localStorage.setItem('token', response.data.token);
+                setUserToken(response.data.token)
                 navigate("/");
                 window.location.reload();
+                localStorage.setItem('isLoggedIn', true);
             } else if (response.status === HttpStatusCode.Unauthorized) {
                 window.alert("Nie poprawny login lub hasło")
             }
@@ -33,6 +34,11 @@ export default function SignInForm() {
             console.log(error)
         });
     }
+    const pressEnter = (e) => {
+        if (e.keyCode === 13) {
+            subForm();
+        }
+    };
 
 
     return (
@@ -49,7 +55,7 @@ export default function SignInForm() {
 
                 <div>
                     <label className={"labelStyle1"}>Hasło:</label><br/>
-                    <input type="password" className={"inputStyle1"}
+                    <input type="password" className={"inputStyle1"} onKeyDown={(e) => pressEnter(e)}
                            onChange={(v) => setPassword(v.target.value)}/><br/>
                 </div>
                 <br/>

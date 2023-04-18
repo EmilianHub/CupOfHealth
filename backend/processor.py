@@ -8,9 +8,10 @@ from keras.models import load_model
 from sqlalchemy import select
 
 import diseaseCache
+from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
-from jwtService import decodeHeaderToken
+import jwtService
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
@@ -52,7 +53,7 @@ def predict_class(sentence):
     # filter out predictions below a threshold
     p = bow(sentence, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.2
+    ERROR_THRESHOLD = 0.15
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -68,6 +69,9 @@ def getResponse(ints, msg):
 
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag)
+        if tag.startswith("leczenie") :
+            ss=showLeczenie(tag)
+            return ss
 
         return retrieveDisesaseResponse(ints, msg)
 
@@ -81,6 +85,11 @@ def isCasualResponse(tag):
 
 
 def retrieveCausalResponse(tag):
+    if tag == TagGroup.end_diagnosis.value:
+        if len(diseaseCache.matching) != 0:
+            return retrieveDiseaseResponse(None, True)
+        return "Niestety nie podałeś mi żadnych objawów, na podstawie których mógłbym określić twoją przypadłość"
+
     response = findResponseWithTagGroup(tag)
 
     if response is not None:
@@ -97,18 +106,18 @@ def retrieveDisesaseResponse(ints, msg):
     for i in ints:
         diseaseCache.addToMatchingCache(msg, i['intent'])
 
-    return retrieveDiseaseResponse(ints)
+    return retrieveDiseaseResponse(ints, False)
 
 
-def retrieveDiseaseResponse(ints):
+def retrieveDiseaseResponse(ints, isForced):
     occurrences = diseaseCache.calculateOccurrences()
 
     if occurrences is not None:
-        confidence = calculateConfidence(occurrences, ints[0])
+        confidence = calculateConfidence(occurrences, ints)
         confidenceKey = next(iter(confidence))
         confidenceVaule = confidence.get(confidenceKey)[0]
 
-        response = getResponseWithConfidance(confidenceKey, confidenceVaule)
+        response = getResponseWithConfidance(confidenceKey, confidenceVaule, isForced)
         randomResponse = random.choice(response)
         diseaseCache.assignReponseMessageId(randomResponse.id)
 
@@ -117,12 +126,14 @@ def retrieveDiseaseResponse(ints):
     return "Jeszcze nie wiem, wybacz"
 
 
-def getResponseWithConfidance(confidenceKey, confidenceVaule):
-    if confidenceVaule >= 0.6:
+def getResponseWithConfidance(confidenceKey, confidenceVaule, isForced):
+    if confidenceVaule >= 0.6 or isForced:
         saveUserDiseaseHistory(confidenceKey, confidenceVaule)
+        saveRegionDisease(confidenceKey)
         return findResponseWithTagGroup(TagGroup.disease)
     elif 0.6 > confidenceVaule > 0.3 or len(diseaseCache.user_msg) >= 3:
         saveUserDiseaseHistory(confidenceKey, confidenceVaule)
+        saveRegionDisease(confidenceKey)
         return findResponseWithTagGroup(TagGroup.question)
 
     return findResponseWithTagGroup(TagGroup.few_questions)
@@ -140,10 +151,10 @@ def calculateConfidence(occurrences, ints):
         pDiseaseQuery = select(Diseases).where(Diseases.choroba.ilike(k.lower()))
         symptomsAmount = db_session.scalars(pDiseaseQuery).one_or_none()
         if symptomsAmount is None:
-            confidence[k] = 0
+            confidence[k] = [0, 0]
         else:
-            if ints['intent'] == k:
-                chatbotProbability = v/len(symptomsAmount.objawy) + float(ints['probability'])
+            if ints is not None and ints[0]['intent'] == k:
+                chatbotProbability = v/len(symptomsAmount.objawy) + float(ints[0]['probability'])
                 arr = [v/len(symptomsAmount.objawy), chatbotProbability]
                 confidence[k] = arr
             else:
@@ -160,8 +171,23 @@ def chatbot_response(msg):
 
 
 def saveUserDiseaseHistory(disease: str, confidence: float):
-    token = decodeHeaderToken()
+    token = jwtService.decodeAuthorizationHeaderToken()
     if token:
         userMsg = diseaseCache.user_msg
-        return userService.saveDiseaseHistory(userMsg, disease, token, confidence)
-    return None
+        userService.saveDiseaseHistory(userMsg, disease, token, confidence)
+
+def saveRegionDisease(disease):
+    location = jwtService.decodeLocationHeader()
+    if location:
+        longitude = location.get("longitude")
+        latitude = location.get("latitude")
+        userService.saveRegionDisease(latitude, longitude, disease)
+
+
+def showLeczenie(msg):
+
+        hh= msg.replace("leczenie: ","")
+        ll = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(hh))
+
+        return db_session.scalars(ll).one_or_none()
+
