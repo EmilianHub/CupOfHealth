@@ -209,12 +209,14 @@ class UserService:
             query = select(UserDiseaseHistory).join(UserDiseaseHistory.user).where(User.email.ilike(email))
             result = db_session.scalars(query).fetchall()
             if result:
-                return [{"Objawy" : rsaEncryption.decrypt(r.user_symptoms),
-                "Choroba" : r.disease.choroba,
-                         "id" : r.id,
-                         "created" : r.created} for r in result]
-            return "Brak hisotrii"
+                return [{
+                    "Objawy": " ".join(rsaEncryption.decrypt(r.user_symptoms).split(",")),
+                    "Choroba": r.disease.choroba,
+                    "id": r.id,
+                    "created": r.created
+                } for r in result]
+            return []
         except Exception as error:
             print("Error occurred while updating user: ", error)
 
-        return "Brak historii"
+        return []

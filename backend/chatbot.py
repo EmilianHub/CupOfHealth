@@ -1,4 +1,3 @@
-import pdb
 import pickle
 import random
 
@@ -15,6 +14,7 @@ from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
+from tagGroup import TagGroup
 
 nlp = spacy.load("pl_core_news_md")
 words = []
@@ -62,8 +62,8 @@ for sentence in sentences:
 for p in casualDiseases:
     for pattern in leczeniePatterns:
         tokenizedWord = nlp(f"{pattern.pattern} {p.choroba}")
-        l = [token.text for token in tokenizedWord if token.text.lower() not in ignore_words]
-        l += [token.lemma_ for token in tokenizedWord if token.text.lower() not in ignore_words]
+        l = [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+        l += [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
         words.extend(l)
         #pdb.set_trace()
 
@@ -95,6 +95,7 @@ for doc in documents:
     for word in pattern_words:
         tokenizedWord = nlp(word)
         temp.extend([token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
+        temp.extend([token.text.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
 
     for w in words:
         bag.append(1) if w in temp else bag.append(0)

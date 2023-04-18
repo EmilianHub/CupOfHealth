@@ -166,3 +166,7 @@ body{
 .help_user h4{
     text-align: center;
 }
+.rowChoroba:hover{
+    cursor: pointer;
+    color: coral;
+}
