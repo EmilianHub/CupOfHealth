@@ -1,7 +1,7 @@
 import pickle
 import random
 from math import ceil
-
+import openai
 import numpy as np
 import spacy
 from keras.models import load_model
@@ -21,8 +21,8 @@ model = load_model('chatbot_model.h5')
 words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
-nlp = spacy.load("pl_core_news_sm")
-
+nlp = spacy.load("pl_core_news_md")
+openai.api_key = "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"
 
 def clean_up_sentence(sentence):
     tokenizedWord = nlp(sentence)
@@ -53,7 +53,7 @@ def predict_class(sentence):
     # filter out predictions below a threshold
     p = bow(sentence, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.15
+    ERROR_THRESHOLD = 0.1
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -62,16 +62,32 @@ def predict_class(sentence):
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
     return return_list
 
+def generate_chat_response(message):
+    response = openai.Completion.create(
+        model="text-davinci-002",
+        prompt=message,
+        temperature=0.8,
+        max_tokens=100
+    )
+    return response.choices[0].text
+
+
+def getOpisChoroby(msg):
+    return generate_chat_response(msg)  # Generowanie odpowiedzi
+
+
 
 def getResponse(ints, msg):
     if len(ints) != 0:
         tag = ints[0]['intent']
 
-        if isCasualResponse(tag):
-            return retrieveCausalResponse(tag)
         if tag.startswith("leczenie") :
             ss=showLeczenie(tag)
             return ss
+        if tag.startswith("opis"):
+            return getOpisChoroby(msg)
+        if isCasualResponse(tag):
+            return retrieveCausalResponse(tag)
 
         return retrieveDisesaseResponse(ints, msg)
 

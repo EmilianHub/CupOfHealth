@@ -14,6 +14,7 @@ class TagGroup(enum.Enum):
     few_questions = "few_questions"
     leczenie = "leczenie"
     end_diagnosis = "end_diagnosis"
+    opis = "opis"
 
     @staticmethod
     def fetch_names():
