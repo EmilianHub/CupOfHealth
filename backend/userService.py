@@ -117,7 +117,7 @@ class UserService:
         try:
             symptoms = ""
             for msg in userSymptoms:
-                symptoms += msg
+                symptoms += msg + ",\n "
 
             encryptedSymptoms = rsaEncryption.encrypt(symptoms)
             diseaseJPA = self.findDiseaseReferance(disease)

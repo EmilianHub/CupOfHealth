@@ -45,9 +45,10 @@ export default function Chat() {
         // eslint-disable-next-line array-callback-return
         userHistory.map((val, key) => {
         let s1 = "Twoje wyszukiwane objawy: "  ;
+        var s2 = '\n';
             if(val.id === id)
             {
-                data.push({"response":s1 + val.Objawy +" Diagnozowana choroba: " + val.Choroba })
+                data.push({"response": s1 + " " + val.Objawy + s2 +" \nDiagnozowana choroba: " + val.Choroba })
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
             }
@@ -103,8 +104,8 @@ export default function Chat() {
                     { isLoggedIn ?  ( <div> {userHistory.map(row =>(
                         <div className="rowChoroba" onClick={()=>HandelEdit(row.id)}> {row.Choroba}  </div>
                     ))} </div> ) : (
-                        <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
-                            to="/sign_in">Zaloguj się</Link><br/>
+                        <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <br/>
+                            <Link to="/sign_in">Zaloguj się</Link><br/>
                             lub <Link to="/register">Utwórz konto</Link>
                         </div>
                         )}

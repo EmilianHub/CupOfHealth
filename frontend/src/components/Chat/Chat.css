@@ -8,6 +8,7 @@ body{
     float: right;
     margin-right: 30px;
     margin-top: auto;
+
 }
 .chat-window {
     background-color: #f5f5f5;
@@ -20,14 +21,24 @@ body{
     padding-top: 6%;
     padding-left: 10px ;
     text-align: center;
-
-}
+    background-image: url("https://as2.ftcdn.net/v2/jpg/01/04/59/77/1000_F_104597721_wf3nepSctMaWMDnbU3emtmeFdRGUtdvf.jpg");
+    }
 
 .chat-window h2 {
     font-size: 3.5rem;
     margin-bottom: 10px;
-    color: dodgerblue;
+    color: black /*dodgerblue;*/;
+    border-radius: 22px;
+
 }
+/*.chat-window h2:hover{*/
+/*    background-image: linear-gradient(80deg, lightblue, yellow);*/
+
+/*}*/
+/*.chat-window h4:hover{*/
+/*    background-image: linear-gradient(80deg, lightblue, yellow);*/
+
+/*}*/
 
 .chat-input {
     display: flex;
@@ -35,8 +46,8 @@ body{
     position: static;
     height: 35px;
     padding-top: 8px;
-    margin-right: 200px;
-    margin-left: 200px;
+    margin-right: 160px;
+    margin-left: 160px;
     flex: 1;
     border: none;
     border-radius: 5px;
@@ -46,11 +57,11 @@ body{
 .chat-input input[type="text"] {
     flex-grow: 1;
     margin-right: 10px;
-
+    color: black;
     display: flex;
     align-items: center;
     padding: 10px;
-    background-color: #f0f0f0;
+    background-color: red;
 
 }
 #message{
@@ -59,8 +70,10 @@ body{
     border-radius: 20px;
     padding: 10px;
     margin-right: 10px;
-    background-color: #fff;
+    background-color: lightslategrey;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    color: black;
 }
 .chat-input button {
     background-color: #0077cc;
@@ -87,16 +100,19 @@ body{
 .chat-window h4 {
 
     margin-bottom: 10px;
-    color: dodgerblue;
+    /*color: dodgerblue;*/
+    font-size: 18px;
+    border-radius: 22px;
 }
 .chatbot{
     height: 290px;
     overflow:auto;
-    width: 80%;
-    margin-left: 10%;
-    border: 2px solid dodgerblue;;
+    width: 88%;
+    margin-left: 6%;
+    #border: 2px solid dodgerblue;;
     padding: 2px;
     /*841*/
+
 }
 .userMsg {
     background-color: #0077cc;
@@ -128,11 +144,12 @@ body{
     float: left;
 }
 .message {
-    margin: 8px;
-    padding: 16px;
+    margin: 6px;
+    padding: 6px;
     border-radius: 5px;
     max-width: 93%;
     clear: both;
+    font-weight: bold;
 }
 .history{
     background-color: cornflowerblue;
@@ -152,7 +169,8 @@ body{
     background-color: #f5f5f5;
     height: 440px;
     padding: 5px;
-    margin: 5px;
+    margin: 5px; background-image: url("https://i.pinimg.com/236x/5e/24/d8/5e24d89df82adfe7fbc6fe2688a78fcc.jpg");
+
 }
 .help_user{
     background-color: lightslategray;
@@ -165,8 +183,15 @@ body{
 }
 .help_user h4{
     text-align: center;
+    font-size: 16px;
+}
+
+.rowChoroba{
+    background-color: dodgerblue;
+    padding: 2px;
+    border-radius: 15px
 }
 .rowChoroba:hover{
     cursor: pointer;
-    color: coral;
+    color: white;
 }
