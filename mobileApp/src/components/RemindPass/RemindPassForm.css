@@ -1,0 +1,44 @@
+.container_pass{
+    text-align: center;
+    margin: auto;
+    padding: 5px;
+    justify-items: center;
+}
+.form_pass {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 10% auto;
+    padding: 20px;
+    #background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(to bottom right, #bf80ff, #809fff);
+}
+
+.label_pass {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input_pass {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.button_pass[type="submit"] {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.button_pass[type="submit"]:hover {
+    background-color: #0062cc;
+}
