@@ -207,3 +207,4 @@ def showLeczenie(msg):
 
         return db_session.scalars(ll).one_or_none()
 
+

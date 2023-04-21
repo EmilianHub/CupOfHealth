@@ -1,20 +1,20 @@
 import pickle
 import random
+
 import numpy as np
 import spacy
-import pdb
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
 from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
-from tagGroup import TagGroup
-from profJPA import Prof
+from miastaJPA import Miasta
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
 from tagGroup import TagGroup
+from wojeJPA import  Woje
 
 nlp = spacy.load("pl_core_news_md")
 words = []
@@ -24,11 +24,12 @@ documents = []
 ignore_words = nlp.Defaults.stop_words
 ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
-casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(Patterns.pattern_group != TagGroup.opis)).fetchall()
+casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(Patterns.pattern_group != TagGroup.opis).where(Patterns.pattern_group != TagGroup.loca)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
+locaPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.loca)).fetchall()
 opisPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.opis)).fetchall()
-
+miasto_woj = db_session.scalars(select(Miasta)).fetchall()
 
 
 for pattern in casualPatterns:
@@ -89,6 +90,33 @@ for p in casualDiseases:
 
         if f"leczenie: {p.choroba}" not in classes:
             classes.append(str(f"leczenie: {p.choroba}"))
+
+
+for miasto in miasto_woj:
+    for pattern in locaPatterns:
+         for woj in miasto.woje:
+            tokenizedWord = nlp(f"{pattern.pattern} {miasto.nazwa}")
+            woje_words = [f"{pattern.pattern} {woj.nazwa}"]
+            woje_words += [token.text.lower() for token in tokenizedWord ]
+            woje_words += [token.lemma_.lower() for token in tokenizedWord ]
+
+            words.extend(woje_words)
+            documents.append((woje_words, str(woj.nazwa)))
+
+            if str(woj.nazwa) not in classes:
+                classes.append(str(woj.nazwa))
+
+    tokenizedWord = nlp(f"{pattern.pattern} {woj.nazwa}")
+    miasto_words = [f"{pattern.pattern} {woj.nazwa}"]
+    miasto_words += [token.text.lower() for token in tokenizedWord ]
+    miasto_words += [token.lemma_.lower() for token in tokenizedWord ]
+
+    words.extend(miasto_words)
+    documents.append((miasto_words, str(mi.nazwa)))
+
+    if str(miasto.nazwa) not in classes:
+        classes.append(str(miasto.nazwa))
+
 
 
 words = sorted(list(set(words)))
