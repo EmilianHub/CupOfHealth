@@ -27,6 +27,7 @@ classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
 nlp = spacy.load("pl_core_news_md")
 openai.api_key = os.getenv("OPENAI_KEY")
+openai.api_key = "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"
 stopword = nlp.Defaults.stop_words
 
 def clean_up_sentence(sentence):
