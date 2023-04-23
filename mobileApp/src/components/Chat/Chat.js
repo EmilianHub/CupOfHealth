@@ -9,12 +9,12 @@ import {getUserToken, setRequestHeader} from "../CookiesManager/CookiesManager";
 export default function Chat() {
     const [question, setQuestion] = useState("")
     const [data, setData] = useState([])
-    const [userHistory, setUserHistory] =  useState([])
+    const [userHistory, setUserHistory] = useState([])
     const navigate = useNavigate();
     let isLoggedIn = getUserToken() !== null
     const [isVisible, setIsVisible] = useState(false);
 
-    useEffect(() =>{
+    useEffect(() => {
         findUserHistory()
     }, [])
 
@@ -25,14 +25,19 @@ export default function Chat() {
         }
         axios.post("http://localhost:5000/chatbot", jwtEncode(json), setRequestHeader())
             .then((response) => {
-                data.push(decodeJwt(response.data))
+                const decodedJson = decodeJwt(response.data)
+                data.push(decodedJson)
+                if (decodedJson.suggestCure) {
+                    data.push({"response": "Czy chciałbyś poznać możliwe sposoby leczenia?"})
+                }
+
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
 
             }).catch((error) => {
             console.log(error)
         })
-    };
+    }
 
     const pressEnter = (e) => {
         if (e.keyCode === 13) {
@@ -41,29 +46,29 @@ export default function Chat() {
     };
 
 
-    function HandelEdit(id){
+    function HandelEdit(id) {
         // eslint-disable-next-line array-callback-return
         userHistory.map((val, key) => {
 
-            if(val.id === id)
-            {
-                data.push({"response":"Twoje objawy: " + val.Objawy + " \n Twoja choroba " + val.Choroba})
+            if (val.id === id) {
+                data.push({"response": "Twoje objawy: " + val.Objawy + " \n Twoja choroba " + val.Choroba})
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
             }
         })
     }
 
-    function findUserHistory(){
-        if (isLoggedIn  && userHistory.length == 0){
+    function findUserHistory() {
+        if (isLoggedIn && userHistory.length == 0) {
             axios.get('http://localhost:5000/user/user_history', setRequestHeader())
-                .then((result )=> {
+                .then((result) => {
                     setUserHistory(result.data)
                     console.log(result.data)
-            })
+                })
         }
         console.log(userHistory)
     }
+
     const Opcje_click = () => {
         setIsVisible(!isVisible);
     };
@@ -96,29 +101,31 @@ export default function Chat() {
                            onChange={(v) => {
                                setQuestion(v.target.value)
                            }}/>
-                    <button id={"send"} onClick={sendMessage}>Wyślij</button>
-                    <button onClick={Opcje_click} className={"history-trigger"}>Opcje</button>
+                    <div>
+                        <button id={"send"} onClick={sendMessage}>Wyślij</button>
+                        <button onClick={Opcje_click} className={"history-trigger"}>Opcje</button>
+                    </div>
                 </div>
             </div>
         </div>
         {isVisible && <div className="history">
-                <div className="history_user">
-                 <h4>Twoje diagnozy</h4>
-                    { isLoggedIn ?  ( <div> {userHistory.map(row =>(
-                        <div onClick={()=>HandelEdit(row.id)}> {row.Choroba}  </div>
-                    ))} </div> ) : (
-                        <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
-                            to="/sign_in">Zaloguj się</Link><br/>
-                            lub <Link to="/register">Utwórz konto</Link>
-                        </div>
-                        )}
-                </div>
-                <div className="help_user">
-                    <h4>Polecenia czatu </h4>
+            <div className="history_user">
+                <h4>Twoje diagnozy</h4>
+                {isLoggedIn ? (<div> {userHistory.map(row => (
+                    <div onClick={() => HandelEdit(row.id)}> {row.Choroba}  </div>
+                ))} </div>) : (
+                    <div className="info"> Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
+                        to="/sign_in">Zaloguj się</Link><br/>
+                        lub <Link to="/register">Utwórz konto</Link>
+                    </div>
+                )}
+            </div>
+            <div className="help_user">
+                <h4>Polecenia czatu </h4>
                 -Leczenie: //nazwa choroby// <br/>
                 -Zachorowania: //nazwa regionu// <br/>
                 - Opisz //nazwa choroby//
-                </div>
+            </div>
         </div>}
         </body>
     )
