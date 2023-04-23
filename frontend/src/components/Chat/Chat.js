@@ -17,6 +17,7 @@ export default function Chat() {
         findUserHistory()
     }, [])
 
+
     function sendMessage() {
         data.push({"user": question})
         const json = {
@@ -24,7 +25,12 @@ export default function Chat() {
         }
         axios.post("http://localhost:5000/chatbot", jwtEncode(json), setRequestHeader())
             .then((response) => {
-                data.push(decodeJwt(response.data))
+                const decodedJson = decodeJwt(response.data)
+                data.push(decodedJson)
+                if (decodedJson.suggestCure) {
+                    data.push({"response": "Czy chciałbyś poznać możliwe sposoby leczenia?"})
+                }
+
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
 
@@ -43,10 +49,11 @@ export default function Chat() {
     function HandelEdit(id){
         // eslint-disable-next-line array-callback-return
         userHistory.map((val, key) => {
-
+        let s1 = "Twoje wyszukiwane objawy: "  ;
+        var s2 = '\n';
             if(val.id === id)
             {
-                data.push({"response":"Twoje objawy: " + val.Objawy + " \n Twoja choroba " + val.Choroba})
+                data.push({"response": s1 + " " + val.Objawy + s2 +" \nDiagnozowana choroba: " + val.Choroba })
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
             }
@@ -54,7 +61,7 @@ export default function Chat() {
     }
 
     function findUserHistory(){
-        if (isLoggedIn  && userHistory.length == 0){
+        if (isLoggedIn  && userHistory.length === 0){
             axios.get('http://localhost:5000/user/user_history', setRequestHeader())
                 .then((result )=> {
                     setUserHistory(result.data)
