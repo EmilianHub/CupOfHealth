@@ -1,34 +1,37 @@
+import os
 import pickle
 import random
 from math import ceil
-import openai
+
 import numpy as np
+import openai
 import spacy
+from dotenv import load_dotenv
 from keras.models import load_model
 from sqlalchemy import select
 
 import diseaseCache
-from profJPA import Prof
+import jwtService
 from chorobyJPA import Diseases
 from dbConnection import db_session
-import jwtService
+from profJPA import Prof
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
 from wikipediaService import findFunFactWithMessage
 
+load_dotenv()
 model = load_model('chatbot_model.h5')
 words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
 nlp = spacy.load("pl_core_news_md")
-openai.api_key = "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"
+openai.api_key = os.getenv("OPENAI_KEY")
+stopword = nlp.Defaults.stop_words
 
 def clean_up_sentence(sentence):
     tokenizedWord = nlp(sentence)
-    sentence_words = [sentence]
-    sentence_words += [token.text.lower() for token in tokenizedWord]
-    sentence_words += [token.lemma_.lower() for token in tokenizedWord]
+    sentence_words = [token.lemma_.lower() for token in tokenizedWord]
     return set(sentence_words)
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
@@ -51,9 +54,9 @@ def bow(sentence, show_details=True):
 
 def predict_class(sentence):
     # filter out predictions below a threshold
-    p = bow(sentence, show_details=False)
+    p = bow(sentence, show_details=True)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.15
+    ERROR_THRESHOLD = 0.1
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)

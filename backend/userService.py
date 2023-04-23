@@ -8,6 +8,7 @@ from sqlalchemy import select, update, func, Interval
 
 import restartCodeCache as restartCodeCache
 import rsaEncryption
+from diseaseCache import clearCache
 from localizationJPA import Localization
 from locationService import getCurrentLocation
 from chorobyJPA import Diseases
@@ -95,8 +96,8 @@ class UserService:
         user = self.findUserWithEmail(email)
         if user is not None and self.__isPasswordCorrect(password, user):
             token = jwtService.generateToken(user.email)
+            clearCache()
             return jsonify({'token': token}), 200
-
         else:
             return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
 
