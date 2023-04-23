@@ -8,6 +8,7 @@ from sqlalchemy import select, update, func, Interval
 
 import restartCodeCache as restartCodeCache
 import rsaEncryption
+from diseaseCache import clearCache
 from localizationJPA import Localization
 from locationService import getCurrentLocation
 from chorobyJPA import Diseases
@@ -95,8 +96,8 @@ class UserService:
         user = self.findUserWithEmail(email)
         if user is not None and self.__isPasswordCorrect(password, user):
             token = jwtService.generateToken(user.email)
+            clearCache()
             return jsonify({'token': token}), 200
-
         else:
             return jsonify({'error': 'Nieprawidłowe dane logowania'}), 401
 
@@ -117,7 +118,7 @@ class UserService:
         try:
             symptoms = ""
             for msg in userSymptoms:
-                symptoms += msg
+                symptoms += msg + ",\n "
 
             encryptedSymptoms = rsaEncryption.encrypt(symptoms)
             diseaseJPA = self.findDiseaseReferance(disease)
@@ -209,12 +210,14 @@ class UserService:
             query = select(UserDiseaseHistory).join(UserDiseaseHistory.user).where(User.email.ilike(email))
             result = db_session.scalars(query).fetchall()
             if result:
-                return [{"Objawy" : rsaEncryption.decrypt(r.user_symptoms),
-                "Choroba" : r.disease.choroba,
-                         "id" : r.id,
-                         "created" : r.created} for r in result]
-            return "Brak hisotrii"
+                return [{
+                    "Objawy": " ".join(rsaEncryption.decrypt(r.user_symptoms).split(",")),
+                    "Choroba": r.disease.choroba,
+                    "id": r.id,
+                    "created": r.created
+                } for r in result]
+            return []
         except Exception as error:
             print("Error occurred while updating user: ", error)
 
-        return "Brak historii"
+        return []

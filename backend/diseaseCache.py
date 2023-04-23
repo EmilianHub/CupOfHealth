@@ -34,3 +34,8 @@ def calculateOccurrences():
 def assignReponseMessageId(id):
     global previousResponseId
     previousResponseId = id
+
+def clearCache():
+    global user_msg, matching
+    user_msg = set()
+    matching = {}
