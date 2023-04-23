@@ -1,8 +1,8 @@
 import pickle
 import random
-
 import numpy as np
 import spacy
+import pdb
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
@@ -24,9 +24,10 @@ documents = []
 ignore_words = nlp.Defaults.stop_words
 ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
-casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie)).fetchall()
+casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(Patterns.pattern_group != TagGroup.opis)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
+opisPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.opis)).fetchall()
 
 
 
@@ -52,6 +53,23 @@ for disease in casualDiseases:
 
         if str(disease.choroba) not in classes:
             classes.append(str(disease.choroba))
+
+
+
+for disease in casualDiseases:
+    for q in opisPatterns:
+        tokenizedWord = nlp(f"{q.pattern} {disease.choroba}")
+        l = [token.text for token in tokenizedWord]
+        l += [token.lemma_ for token in tokenizedWord]
+        words.extend(l)
+        #pdb.set_trace()
+
+        documents.append((l, str(f"opis: {disease.choroba}")))
+
+        if f"opis: {disease.choroba}" not in classes:
+            classes.append(str(f"opis: {disease.choroba}"))
+
+
 
 for sentence in sentences:
     doc = nlp(sentence)
@@ -94,8 +112,8 @@ for doc in documents:
     temp = []
     for word in pattern_words:
         tokenizedWord = nlp(word)
-        temp.extend([token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
-        temp.extend([token.text.lower() for token in tokenizedWord if token.lemma_ not in ignore_words])
+        temp.extend([token.lemma_.lower() for token in tokenizedWord])
+        temp.extend([token.text.lower() for token in tokenizedWord])
 
     for w in words:
         bag.append(1) if w in temp else bag.append(0)
