@@ -25,7 +25,12 @@ export default function Chat() {
         }
         axios.post("http://localhost:5000/chatbot", jwtEncode(json), setRequestHeader())
             .then((response) => {
-                data.push(decodeJwt(response.data))
+                const decodedJson = decodeJwt(response.data)
+                data.push(decodedJson)
+                if (decodedJson.suggestCure) {
+                    data.push({"response": "Czy chciałbyś poznać możliwe sposoby leczenia?"})
+                }
+
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
 

@@ -1,7 +1,8 @@
 user_msg = set()
 matching = {}
 previousResponseId = 0
-
+suggestCure = False
+suggestForDisease = ""
 
 def addToMsgCache(msg):
     user_msg.add(msg)
@@ -31,11 +32,23 @@ def calculateOccurrences():
         return occurrences
     return None
 
+
 def assignReponseMessageId(id):
     global previousResponseId
     previousResponseId = id
+
 
 def clearCache():
     global user_msg, matching
     user_msg = set()
     matching = {}
+
+
+def setSuggestCure(boolean):
+    global suggestCure
+    suggestCure = boolean
+
+
+def setSuggestDisease(disease):
+    global suggestForDisease
+    suggestForDisease = disease
