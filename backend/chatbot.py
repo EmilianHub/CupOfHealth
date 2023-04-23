@@ -1,3 +1,4 @@
+import pdb
 import pickle
 import random
 
@@ -14,7 +15,7 @@ from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
 from tagGroup import TagGroup
-from wojeJPA import  Woje
+
 
 nlp = spacy.load("pl_core_news_md")
 words = []
@@ -94,28 +95,28 @@ for p in casualDiseases:
 
 for miasto in miasto_woj:
     for pattern in locaPatterns:
-         for woj in miasto.woje:
-            tokenizedWord = nlp(f"{pattern.pattern} {miasto.nazwa}")
-            woje_words = [f"{pattern.pattern} {woj.nazwa}"]
-            woje_words += [token.text.lower() for token in tokenizedWord ]
-            woje_words += [token.lemma_.lower() for token in tokenizedWord ]
 
-            words.extend(woje_words)
-            documents.append((woje_words, str(woj.nazwa)))
+            tokenizedWordmiasto = nlp(f"{pattern.pattern} {miasto.nazwa}")
+            miasto_words = [f"{pattern.pattern} {miasto.nazwa}"]
+            miasto_words += [token.text.lower() for token in tokenizedWordmiasto ]
+            miasto_words += [token.lemma_.lower() for token in tokenizedWordmiasto ]
 
-            if str(woj.nazwa) not in classes:
-                classes.append(str(woj.nazwa))
+            words.extend(miasto_words)
+            documents.append((miasto_words, f"lokalizacja: {miasto.nazwa}"))
 
-    tokenizedWord = nlp(f"{pattern.pattern} {woj.nazwa}")
-    miasto_words = [f"{pattern.pattern} {woj.nazwa}"]
-    miasto_words += [token.text.lower() for token in tokenizedWord ]
-    miasto_words += [token.lemma_.lower() for token in tokenizedWord ]
+            if  f"lokalizacja: {miasto.nazwa}" not in classes:
+                classes.append (f"lokalizacja: {miasto.nazwa}")
 
-    words.extend(miasto_words)
-    documents.append((miasto_words, str(mi.nazwa)))
+            tokenizedWordwoj = nlp(f"{pattern.pattern} {miasto.wojewodztwa.nazwa}")
+            wojewodztwa_words = [f"{pattern.pattern} {miasto.wojewodztwa.nazwa}"]
+            wojewodztwa_words += [token.text.lower() for token in tokenizedWordwoj ]
+            wojewodztwa_words += [token.lemma_.lower() for token in tokenizedWordwoj ]
 
-    if str(miasto.nazwa) not in classes:
-        classes.append(str(miasto.nazwa))
+            words.extend(wojewodztwa_words)
+            documents.append((wojewodztwa_words,  f"lokalizacja: {miasto.wojewodztwa.nazwa}"))
+            pdb.set_trace()
+            if f": {miasto.wojewodztwa.nazwa}" not in classes:
+                classes.append(f"lokalizacja: {miasto.wojewodztwa.nazwa}")
 
 
 

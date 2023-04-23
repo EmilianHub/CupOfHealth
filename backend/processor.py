@@ -5,9 +5,10 @@ import openai
 import numpy as np
 import spacy
 from keras.models import load_model
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 import diseaseCache
+from localizationJPA import Localization
 from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
@@ -53,7 +54,7 @@ def predict_class(sentence):
     # filter out predictions below a threshold
     p = bow(sentence, show_details=False)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.1
+    ERROR_THRESHOLD = 0.01
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -84,6 +85,8 @@ def getResponse(ints, msg):
         if tag.startswith("leczenie") :
             ss=showLeczenie(tag)
             return ss
+        if tag.startswith("lokalizacja"):
+            return getchorobaforplace(tag)
         if tag.startswith("opis"):
             return getOpisChoroby(msg)
         if isCasualResponse(tag):
@@ -208,3 +211,12 @@ def showLeczenie(msg):
         return db_session.scalars(ll).one_or_none()
 
 
+def getchorobaforplace(msg):
+
+    qq = msg.replace("lokalizacja: ","")
+    pp = select(Diseases.choroba).select_from(Localization).join(Localization.choroba).where(Localization.miasto.contains(qq)).group_by(Diseases.choroba).order_by(func.count(Localization.choroba_id).desc())
+    hw = db_session.scalars(pp).first()
+    if hw is None:
+        dp = select(Diseases.choroba).select_from(Localization).join(Localization.choroba).where(Localization.woj.contains(qq)).group_by(Diseases.choroba).order_by(func.count(Localization.choroba_id).desc())
+        return db_session.scalars(dp).first()
+    return hw
