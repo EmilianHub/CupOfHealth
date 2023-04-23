@@ -6,12 +6,12 @@
     padding: 0 30px;
     background-color: cornflowerblue;
     box-shadow: 0 5px 15px rgb(0,0,0,0.25);
-    width: 650px;
+    width: 270px;
     height: 100px;
     border-radius: 13px;
     position: fixed;
-    top: 20px;
-    left: 65%;
+    top: 30px;
+    left: 48%;
     transform: translate(-50%);
 }
 .NavBarItems_relog{
@@ -22,7 +22,7 @@
     padding: 0 30px;
     background-color: cornflowerblue;
     box-shadow: 0 5px 15px rgb(0,0,0,0.25);
-    width: 650px;
+    width: 260px;
     height: 100px;
     border-radius: 13px;
     position: fixed;

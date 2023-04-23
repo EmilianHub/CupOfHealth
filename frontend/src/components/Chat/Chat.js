@@ -100,10 +100,10 @@ export default function Chat() {
                 <div className="history_user">
                  <h4>Twoje diagnozy</h4>
                     { isLoggedIn ?  ( <div> {userHistory.map(row =>(
-                        <div onClick={()=>HandelEdit(row.id)}> {row.Choroba}  </div>
+                        <div className="rowChoroba" onClick={()=>HandelEdit(row.id)}> {row.Choroba}  </div>
                     ))} </div> ) : (
-                        <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <Link
-                            to="/sign_in">Zaloguj się</Link><br/>
+                        <div className="info">  Aby korzystać z pełnej możliwości zapamiętywania historii czatu <br/>
+                            <Link to="/sign_in">Zaloguj się</Link><br/>
                             lub <Link to="/register">Utwórz konto</Link>
                         </div>
                         )}

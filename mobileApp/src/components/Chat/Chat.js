@@ -12,6 +12,7 @@ export default function Chat() {
     const [userHistory, setUserHistory] =  useState([])
     const navigate = useNavigate();
     let isLoggedIn = getUserToken() !== null
+    const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() =>{
         findUserHistory()
@@ -63,6 +64,9 @@ export default function Chat() {
         }
         console.log(userHistory)
     }
+    const Opcje_click = () => {
+        setIsVisible(!isVisible);
+    };
 
     return (
         <body>
@@ -93,10 +97,11 @@ export default function Chat() {
                                setQuestion(v.target.value)
                            }}/>
                     <button id={"send"} onClick={sendMessage}>Wyślij</button>
+                    <button onClick={Opcje_click} className={"history-trigger"}>Opcje</button>
                 </div>
             </div>
         </div>
-            <div className="history">
+        {isVisible && <div className="history">
                 <div className="history_user">
                  <h4>Twoje diagnozy</h4>
                     { isLoggedIn ?  ( <div> {userHistory.map(row =>(
@@ -114,7 +119,7 @@ export default function Chat() {
                 -Zachorowania: //nazwa regionu// <br/>
                 - Opisz //nazwa choroby//
                 </div>
-        </div>
+        </div>}
         </body>
     )
 }
