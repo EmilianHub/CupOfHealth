@@ -1,4 +1,3 @@
-import pdb
 import pickle
 import random
 
@@ -7,7 +6,6 @@ import spacy
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
-from spacy.lang.pl.examples import sentences
 from sqlalchemy import select
 
 from miastaJPA import Miasta
@@ -15,7 +13,6 @@ from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
 from tagGroup import TagGroup
-
 
 nlp = spacy.load("pl_core_news_md")
 words = []
@@ -32,10 +29,10 @@ locaPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group 
 opisPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.opis)).fetchall()
 miasto_woj = db_session.scalars(select(Miasta)).fetchall()
 
-
 for pattern in casualPatterns:
     tokenizedWord = nlp(pattern.pattern)
-    pattern_words = [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+    pattern_words = [token.lemma_.lower() for token in tokenizedWord]
+    pattern_words += [token.text.lower() for token in tokenizedWord]
 
     words.extend(pattern_words)
     documents.append((pattern_words, str(pattern.pattern_group.value)))
@@ -43,12 +40,12 @@ for pattern in casualPatterns:
     if str(pattern.pattern_group.value) not in classes:
         classes.append(str(pattern.pattern_group.value))
 
+
 for disease in casualDiseases:
     for symptom in disease.objawy:
         tokenizedWord = nlp(symptom.objawy)
-        symptom_words = [symptom.objawy]
-        symptom_words += [token.text.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
-        symptom_words += [token.lemma_.lower() for token in tokenizedWord if token.text.lower() not in ignore_words]
+        symptom_words = [token.text.lower() for token in tokenizedWord if token.lemma_ not in ignore_words]
+        symptom_words += [token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words]
 
         words.extend(symptom_words)
         documents.append((symptom_words, str(disease.choroba)))
@@ -57,14 +54,12 @@ for disease in casualDiseases:
             classes.append(str(disease.choroba))
 
 
-
 for disease in casualDiseases:
     for q in opisPatterns:
         tokenizedWord = nlp(f"{q.pattern} {disease.choroba}")
-        l = [token.text for token in tokenizedWord]
-        l += [token.lemma_ for token in tokenizedWord]
+        l = [token.text.lower() for token in tokenizedWord]
+        l += [token.lemma_.lower() for token in tokenizedWord]
         words.extend(l)
-        #pdb.set_trace()
 
         documents.append((l, str(f"opis: {disease.choroba}")))
 
@@ -72,20 +67,12 @@ for disease in casualDiseases:
             classes.append(str(f"opis: {disease.choroba}"))
 
 
-
-for sentence in sentences:
-    doc = nlp(sentence)
-    for token in doc:
-        if token.lemma_.lower() not in words and ignore_words:
-            words.append(token.lemma_.lower())
-
 for p in casualDiseases:
     for pattern in leczeniePatterns:
         tokenizedWord = nlp(f"{pattern.pattern} {p.choroba}")
-        l = [token.text for token in tokenizedWord if token.text.lower() not in ignore_words]
-        l += [token.lemma_ for token in tokenizedWord if token.text.lower() not in ignore_words]
+        l = [token.text.lower() for token in tokenizedWord if token.lemma_ not in ignore_words]
+        l += [token.lemma_.lower() for token in tokenizedWord if token.lemma_ not in ignore_words]
         words.extend(l)
-        #pdb.set_trace()
 
         documents.append((l, str(f"leczenie: {p.choroba}")))
 
@@ -114,10 +101,9 @@ for miasto in miasto_woj:
 
             words.extend(wojewodztwa_words)
             documents.append((wojewodztwa_words,  f"lokalizacja: {miasto.wojewodztwa.nazwa}"))
-            pdb.set_trace()
+
             if f": {miasto.wojewodztwa.nazwa}" not in classes:
                 classes.append(f"lokalizacja: {miasto.wojewodztwa.nazwa}")
-
 
 
 words = sorted(list(set(words)))
@@ -142,6 +128,7 @@ for doc in documents:
     for word in pattern_words:
         tokenizedWord = nlp(word)
         temp.extend([token.lemma_.lower() for token in tokenizedWord])
+        temp.extend([token.text.lower() for token in tokenizedWord])
 
     for w in words:
         bag.append(1) if w in temp else bag.append(0)

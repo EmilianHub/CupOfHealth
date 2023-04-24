@@ -1,36 +1,41 @@
+import os
 import pickle
 import random
 from math import ceil
-import openai
+
 import numpy as np
+import openai
 import spacy
+from dotenv import load_dotenv
 from keras.models import load_model
 from sqlalchemy import select, func
 
 import diseaseCache
+import jwtService
 from localizationJPA import Localization
-from profJPA import Prof
 from chorobyJPA import Diseases
 from dbConnection import db_session
-import jwtService
+from profJPA import Prof
 from responsesJPA import Responses
 from tagGroup import TagGroup
 from userService import UserService
 from wikipediaService import findFunFactWithMessage
 
+load_dotenv()
 model = load_model('chatbot_model.h5')
 words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
 nlp = spacy.load("pl_core_news_md")
-openai.api_key = "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"
+openai.api_key = os.getenv("OPENAI_KEY")
+stopword = nlp.Defaults.stop_words
+
 
 def clean_up_sentence(sentence):
     tokenizedWord = nlp(sentence)
-    sentence_words = [sentence]
-    sentence_words += [token.text.lower() for token in tokenizedWord]
-    sentence_words += [token.lemma_.lower() for token in tokenizedWord]
+    sentence_words = [token.lemma_.lower() for token in tokenizedWord]
     return set(sentence_words)
+
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
 
@@ -52,9 +57,9 @@ def bow(sentence, show_details=True):
 
 def predict_class(sentence):
     # filter out predictions below a threshold
-    p = bow(sentence, show_details=False)
+    p = bow(sentence, show_details=True)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.01
+    ERROR_THRESHOLD = 0.1
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -62,6 +67,7 @@ def predict_class(sentence):
     for r in results:
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
     return return_list
+
 
 def generate_chat_response(message):
     response = openai.Completion.create(
@@ -77,18 +83,18 @@ def getOpisChoroby(msg):
     return generate_chat_response(msg)  # Generowanie odpowiedzi
 
 
-
 def getResponse(ints, msg):
-    if len(ints) != 0:
+    if len(ints) == 0 and diseaseCache.suggestCure:
+        return suggestCure(msg)
+    elif len(ints) != 0:
         tag = ints[0]['intent']
 
-        if tag.startswith("leczenie") :
-            ss=showLeczenie(tag)
-            return ss
-        if tag.startswith("lokalizacja"):
-            return getchorobaforplace(tag)
+        if tag.startswith("leczenie"):
+            return showLeczenie(tag)
         if tag.startswith("opis"):
             return getOpisChoroby(msg)
+        if tag.startswith("lokalizacja"):
+            return getchorobaforplace(tag)
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag)
 
@@ -139,16 +145,26 @@ def retrieveDiseaseResponse(ints, isForced):
         response = getResponseWithConfidance(confidenceKey, confidenceVaule, isForced)
         randomResponse = random.choice(response)
         diseaseCache.assignReponseMessageId(randomResponse.id)
+        percent = calculatePercent(ceil(confidenceVaule * 100))
 
-        return randomResponse.response.format(confidenceKey, f"{ceil(confidenceVaule*100)}%")
+        return randomResponse.response.format(confidenceKey, f"{percent}%")
 
     return "Jeszcze nie wiem, wybacz"
+
+
+def calculatePercent(percent):
+    if percent > 100:
+        return 100
+    else:
+        return percent
 
 
 def getResponseWithConfidance(confidenceKey, confidenceVaule, isForced):
     if confidenceVaule >= 0.6 or isForced:
         saveUserDiseaseHistory(confidenceKey, confidenceVaule)
         saveRegionDisease(confidenceKey)
+        diseaseCache.setSuggestCure(True)
+        diseaseCache.setSuggestDisease(confidenceKey)
         return findResponseWithTagGroup(TagGroup.disease)
     elif 0.6 > confidenceVaule > 0.3 or len(diseaseCache.user_msg) >= 3:
         saveUserDiseaseHistory(confidenceKey, confidenceVaule)
@@ -159,7 +175,7 @@ def getResponseWithConfidance(confidenceKey, confidenceVaule, isForced):
 
 
 def findResponseWithTagGroup(group):
-    responseQuery = select(Responses).where(Responses.response_group == group)\
+    responseQuery = select(Responses).where(Responses.response_group == group) \
         .where(Responses.id != diseaseCache.previousResponseId)
     return db_session.scalars(responseQuery).fetchall()
 
@@ -173,11 +189,11 @@ def calculateConfidence(occurrences, ints):
             confidence[k] = [0, 0]
         else:
             if ints is not None and ints[0]['intent'] == k:
-                chatbotProbability = v/len(symptomsAmount.objawy) + float(ints[0]['probability'])
-                arr = [v/len(symptomsAmount.objawy), chatbotProbability]
+                chatbotProbability = v / len(symptomsAmount.objawy) + float(ints[0]['probability'])
+                arr = [v / len(symptomsAmount.objawy), chatbotProbability]
                 confidence[k] = arr
             else:
-                count = v/len(symptomsAmount.objawy)
+                count = v / len(symptomsAmount.objawy)
                 confidence[k] = [count, count]
 
     return dict(sorted(confidence.items(), key=lambda item: item[1][1], reverse=True))
@@ -189,11 +205,22 @@ def chatbot_response(msg):
     return res
 
 
+def suggestCure(msg):
+    res = 'Tak to tak, nie to nie :)'
+    if diseaseCache.suggestForDisease:
+        if "tak" in msg.lower() and diseaseCache.suggestCure:
+            res = showLeczenie(diseaseCache.suggestForDisease)
+        elif "nie" in msg.lower() and diseaseCache.suggestCure:
+            res = "Dobrze, w takim razie sugeruję udanie się do lekarza, który dokładnie Cię zbada :)"
+    diseaseCache.setSuggestCure(False)
+    return res
+
 def saveUserDiseaseHistory(disease: str, confidence: float):
     token = jwtService.decodeAuthorizationHeaderToken()
     if token:
         userMsg = diseaseCache.user_msg
         userService.saveDiseaseHistory(userMsg, disease, token, confidence)
+
 
 def saveRegionDisease(disease):
     location = jwtService.decodeLocationHeader()
@@ -204,12 +231,10 @@ def saveRegionDisease(disease):
 
 
 def showLeczenie(msg):
+    disease = msg.replace("leczenie: ", "")
+    query = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(disease))
 
-        hh= msg.replace("leczenie: ","")
-        ll = select(Prof.profilaktyka).join(Prof.choroba).where(Diseases.choroba.ilike(hh))
-
-        return db_session.scalars(ll).one_or_none()
-
+    return db_session.scalars(query).one_or_none()
 
 def getchorobaforplace(msg):
 

@@ -3,6 +3,7 @@ from flask_cors import CORS
 
 import processor
 import rsaEncryption
+import diseaseCache
 from jwtService import decodeRequest, encodeResponse
 from locationResource import location
 from userResource import user
@@ -20,7 +21,9 @@ def chatbotResponse():
     arg = request.get_data()
     the_question = decodeRequest(arg).get("question")
     response = processor.chatbot_response(the_question)
-    json = {"response": response}
+    json = {"response": response,
+            "suggestCure": diseaseCache.suggestCure
+            }
 
     return encodeResponse(json)
 

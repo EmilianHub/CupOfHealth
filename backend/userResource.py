@@ -3,11 +3,13 @@ from functools import wraps
 from flask import Blueprint, request, jsonify
 
 import jwtService
+from diseaseCache import clearCache
 from userService import UserService
 
 user = Blueprint("user", __name__)
 
 userService = UserService()
+
 
 @user.post("/send_code")
 def sendRestartCode():
@@ -42,16 +44,6 @@ def edit_email():
     return userService.editEmail(email, newEmail)
 
 
-@user.post('/save_localization')
-def saveLocalization():
-    args = jwtService.decodeRequest(request.get_data())
-    woj = args.get("lat")
-    miasto = args.get("long")
-    choroba = args.get("choroba")
-    email = args.get("email")
-    return userService.saveRegionDisease(woj, miasto, choroba, email)
-
-
 @user.post("/register")
 def register():
     args = jwtService.decodeRequest(request.get_data())
@@ -84,10 +76,12 @@ def token_required(f):
         return f(*args)
     return decorated
 
+
 @user.get('/protected')
 @token_required
 def protected():
     return jsonify({'message': 'Token JWT czuwa.'}), 200
+
 
 @user.get('/user_history')
 def get_user_history():
@@ -95,3 +89,9 @@ def get_user_history():
     if token:
         result = userService.findUserHistory(token.get("email"))
         return jsonify(result)
+
+
+@user.get('/logout')
+def logout():
+    clearCache()
+    return "Cache cleared"
