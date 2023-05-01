@@ -130,16 +130,26 @@ body{
 .history{
     background-color: cornflowerblue;
     border: 2px solid #ccc;
-    height: 75vh;
-    margin-top: 1vh;
-    margin-left: 4vw;
+    height: 88vh;
+    margin-top: 4vh;
+    #margin-left: 4vw;
     padding-right: 10vw;
     padding-top: 1%;
     padding-left: 10vw;
     text-align: center;
     float: left;
-    width: 70%;
+    width: 75%;
     z-index: 1;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+.history.visible{
+    opacity: 0;
 }
 .history_user{
     overflow-y: scroll;
@@ -161,4 +171,25 @@ body{
 }
 .help_user h4{
     text-align: center;
+}
+.history-trigger1{
+    position: fixed;
+    top: 33%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+.history-trigger2{
+    position: fixed;
+    top: 33%;
+    left: 85%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+
 }

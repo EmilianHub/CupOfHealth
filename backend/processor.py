@@ -27,6 +27,7 @@ classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
 nlp = spacy.load("pl_core_news_md")
 openai.api_key = os.getenv("OPENAI_KEY")
+openai.api_key = "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"
 stopword = nlp.Defaults.stop_words
 
 
@@ -87,7 +88,7 @@ def getResponse(ints, msg):
         return suggestCure(msg)
     elif len(ints) != 0:
         tag = ints[0]['intent']
-
+        diseaseCache.setSuggestCure(False)
         if tag.startswith("leczenie"):
             return showLeczenie(tag)
         if tag.startswith("opis"):
