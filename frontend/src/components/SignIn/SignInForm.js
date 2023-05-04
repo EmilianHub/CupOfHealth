@@ -3,7 +3,7 @@ import axios, {HttpStatusCode} from "axios";
 import "./SignInForm.css"
 import {useNavigate} from "react-router-dom";
 import {Link} from 'react-router-dom';
-import {setRequestHeader, setUserToken} from "../CookiesManager/CookiesManager";
+import {setUserToken} from "../CookiesManager/CookiesManager";
 import {jwtEncode} from "../JwtManager/JwtManager";
 
 export default function SignInForm() {

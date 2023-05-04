@@ -29,7 +29,7 @@ words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
 nlp = spacy.load("pl_core_news_md")
-openai.api_key = os.getenv("OPENAI_KEY")
+openai.api_key = "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"
 stopword = nlp.Defaults.stop_words
 
 
@@ -61,7 +61,7 @@ def predict_class(sentence):
     # filter out predictions below a threshold
     p = bow(sentence, show_details=True)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.01
+    ERROR_THRESHOLD = 0.1
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
