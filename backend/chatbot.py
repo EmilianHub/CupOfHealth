@@ -22,7 +22,8 @@ documents = []
 ignore_words = nlp.Defaults.stop_words
 ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
-casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(Patterns.pattern_group != TagGroup.opis).where(Patterns.pattern_group != TagGroup.loca)).fetchall()
+casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(
+    Patterns.pattern_group != TagGroup.opis)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
 locaPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.loca)).fetchall()
@@ -40,7 +41,6 @@ for pattern in casualPatterns:
     if str(pattern.pattern_group.value) not in classes:
         classes.append(str(pattern.pattern_group.value))
 
-
 for disease in casualDiseases:
     for symptom in disease.objawy:
         tokenizedWord = nlp(symptom.objawy)
@@ -52,7 +52,6 @@ for disease in casualDiseases:
 
         if str(disease.choroba) not in classes:
             classes.append(str(disease.choroba))
-
 
 for disease in casualDiseases:
     for q in opisPatterns:
@@ -66,7 +65,6 @@ for disease in casualDiseases:
         if f"opis: {disease.choroba}" not in classes:
             classes.append(str(f"opis: {disease.choroba}"))
 
-
 for p in casualDiseases:
     for pattern in leczeniePatterns:
         tokenizedWord = nlp(f"{pattern.pattern} {p.choroba}")
@@ -79,41 +77,37 @@ for p in casualDiseases:
         if f"leczenie: {p.choroba}" not in classes:
             classes.append(str(f"leczenie: {p.choroba}"))
 
-
-for miasto in miasto_woj:
-    for pattern in locaPatterns:
-
-            tokenizedWordmiasto = nlp(f"{pattern.pattern} {miasto.nazwa}")
-            miasto_words = [f"{pattern.pattern} {miasto.nazwa}"]
-            miasto_words += [token.text.lower() for token in tokenizedWordmiasto ]
-            miasto_words += [token.lemma_.lower() for token in tokenizedWordmiasto ]
-
-            words.extend(miasto_words)
-            documents.append((miasto_words, f"lokalizacja: {miasto.nazwa}"))
-
-            if  f"lokalizacja: {miasto.nazwa}" not in classes:
-                classes.append (f"lokalizacja: {miasto.nazwa}")
-
-            tokenizedWordwoj = nlp(f"{pattern.pattern} {miasto.wojewodztwa.nazwa}")
-            wojewodztwa_words = [f"{pattern.pattern} {miasto.wojewodztwa.nazwa}"]
-            wojewodztwa_words += [token.text.lower() for token in tokenizedWordwoj ]
-            wojewodztwa_words += [token.lemma_.lower() for token in tokenizedWordwoj ]
-
-            words.extend(wojewodztwa_words)
-            documents.append((wojewodztwa_words,  f"lokalizacja: {miasto.wojewodztwa.nazwa}"))
-
-            if f": {miasto.wojewodztwa.nazwa}" not in classes:
-                classes.append(f"lokalizacja: {miasto.wojewodztwa.nazwa}")
+# for miasto in miasto_woj:
+#     for pattern in locaPatterns:
+#         tokenizedWordMiasto = nlp(f"{pattern.pattern} {miasto.nazwa}")
+#         miasto_words = [token.text.lower() for token in tokenizedWordMiasto if token.lemma_ not in ignore_words]
+#         miasto_words += [token.lemma_.lower() for token in tokenizedWordMiasto if token.lemma_ not in ignore_words]
+#
+#         words.extend(miasto_words)
+#         documents.append((miasto_words, f"lokalizacja: {miasto.nazwa}"))
+#
+#         if f"lokalizacja: {miasto.nazwa}" not in classes:
+#             classes.append(f"lokalizacja: {miasto.nazwa}")
+#
+#         tokenizedWordWoj = nlp(f"{pattern.pattern} {miasto.wojewodztwa.nazwa}")
+#         wojewodztwa_words = [token.text.lower() for token in tokenizedWordWoj if token.lemma_ not in ignore_words]
+#         wojewodztwa_words += [token.lemma_.lower() for token in tokenizedWordWoj if token.lemma_ not in ignore_words]
+#
+#         words.extend(wojewodztwa_words)
+#         documents.append((wojewodztwa_words, f"lokalizacja: {miasto.wojewodztwa.nazwa}"))
+#
+#         if f": {miasto.wojewodztwa.nazwa}" not in classes:
+#             classes.append(f"lokalizacja: {miasto.wojewodztwa.nazwa}")
 
 
 words = sorted(list(set(words)))
 classes = sorted(list(set(classes)))
 
-print(len(documents), "documents")
-
-print(len(classes), "classes", classes)
-
-print(len(words), "unique lemmatized words", words)
+# print(len(documents), "documents")
+#
+# print(len(classes), "classes", classes)
+#
+# print(len(words), "unique lemmatized words", words)
 
 pickle.dump(words, open('words.pkl', 'wb'))
 pickle.dump(classes, open('classes.pkl', 'wb'))

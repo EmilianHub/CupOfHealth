@@ -1,3 +1,4 @@
+import math
 import os
 import pickle
 import random
@@ -8,13 +9,14 @@ import openai
 import spacy
 from dotenv import load_dotenv
 from keras.models import load_model
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
+from itertools import groupby
 
 import diseaseCache
 import jwtService
-from localizationJPA import Localization
 from chorobyJPA import Diseases
 from dbConnection import db_session
+from localizationJPA import Localization
 from profJPA import Prof
 from responsesJPA import Responses
 from tagGroup import TagGroup
@@ -59,7 +61,7 @@ def predict_class(sentence):
     # filter out predictions below a threshold
     p = bow(sentence, show_details=True)
     res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.1
+    ERROR_THRESHOLD = 0.01
     results = [[i, r] for i, r in enumerate(res) if r >= ERROR_THRESHOLD]
     # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
@@ -87,16 +89,17 @@ def getResponse(ints, msg):
     if len(ints) == 0 and diseaseCache.suggestCure:
         return suggestCure(msg)
     elif len(ints) != 0:
+        diseaseCache.setSuggestCure(False)
         tag = ints[0]['intent']
 
         if tag.startswith("leczenie"):
             return showLeczenie(tag)
         if tag.startswith("opis"):
             return getOpisChoroby(msg)
-        if tag.startswith("lokalizacja"):
-            return getchorobaforplace(tag)
+        # if tag.startswith("lokalizacja"):
+        #     return findDiseaseForRegion(tag)
         if isCasualResponse(tag):
-            return retrieveCausalResponse(tag)
+            return retrieveCausalResponse(tag, msg)
 
         return retrieveDisesaseResponse(ints, msg)
 
@@ -109,11 +112,14 @@ def isCasualResponse(tag):
     return len(list(pFilter)) != 0
 
 
-def retrieveCausalResponse(tag):
+def retrieveCausalResponse(tag, msg):
     if tag == TagGroup.end_diagnosis.value:
         if len(diseaseCache.matching) != 0:
             return retrieveDiseaseResponse(None, True)
         return "Niestety nie podałeś mi żadnych objawów, na podstawie których mógłbym określić twoją przypadłość"
+
+    if tag == TagGroup.loca.value:
+        return findDiseaseForRegion(msg)
 
     response = findResponseWithTagGroup(tag)
 
@@ -215,6 +221,7 @@ def suggestCure(msg):
     diseaseCache.setSuggestCure(False)
     return res
 
+
 def saveUserDiseaseHistory(disease: str, confidence: float):
     token = jwtService.decodeAuthorizationHeaderToken()
     if token:
@@ -236,12 +243,38 @@ def showLeczenie(msg):
 
     return db_session.scalars(query).one_or_none()
 
-def getchorobaforplace(msg):
 
-    qq = msg.replace("lokalizacja: ","")
-    pp = select(Diseases.choroba).select_from(Localization).join(Localization.choroba).where(Localization.miasto.contains(qq)).group_by(Diseases.choroba).order_by(func.count(Localization.choroba_id).desc())
-    hw = db_session.scalars(pp).first()
-    if hw is None:
-        dp = select(Diseases.choroba).select_from(Localization).join(Localization.choroba).where(Localization.woj.contains(qq)).group_by(Diseases.choroba).order_by(func.count(Localization.choroba_id).desc())
-        return db_session.scalars(dp).first()
-    return hw
+def findDiseaseForRegion(msg):
+    localization = matchRegion(msg)
+    query = select(Diseases.choroba).select_from(Localization).join(Localization.choroba).filter(
+        or_(Localization.woj == localization, Localization.miasto == localization)) \
+        .group_by(Diseases.choroba).order_by(func.count(Localization.choroba_id).desc())
+    result = db_session.scalars(query).first()
+    if result is None:
+        return "Nie mam jeszcze żadnych danych dla tego regionu"
+    return f"Najczęściej występująca choroba w {localization} to {result}"
+
+
+def matchRegion(msg):
+    result = db_session \
+        .execute(select(Localization.woj, Localization.miasto).select_from(Localization)
+                 .distinct(Localization.woj, Localization.miasto)
+                 ) \
+        .fetchall()
+
+    distinctRegions = {i: [j[1] for j in j] for i, j in groupby(result, key=lambda x: x[0])}
+    lemmaMsg = [token.lemma_.lower() for token in nlp(msg)]
+
+    for k, v in distinctRegions.items():
+        lemmaKey = [token.lemma_.lower() for token in nlp(k)]
+        count = len([x for x in lemmaKey + lemmaMsg if x in lemmaKey and x in lemmaMsg])
+        if count >= len(lemmaKey) / 2:
+            return k
+        else:
+            for row in v:
+                lemmaVal = [token.lemma_.lower() for token in nlp(row)]
+                count = len([x for x in lemmaVal if x in lemmaMsg])
+                if count >= math.ceil(len(lemmaVal)/2):
+                    return row
+
+    return None
