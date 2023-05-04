@@ -1,4 +1,3 @@
-import React from "react";
 import {jwtEncode} from "../JwtManager/JwtManager";
 
 export function getCurrentPosition() {

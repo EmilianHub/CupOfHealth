@@ -13,7 +13,6 @@
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7 (CupOfHealth)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Python 3.7 (CupOfMedicine) interpreter library" level="application" />
   </component>
   <component name="PyNamespacePackagesService">
     <option name="namespacePackageFolders">

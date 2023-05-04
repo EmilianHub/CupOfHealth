@@ -70,12 +70,6 @@ function RemindPass() {
             }
         });
     }
-    const pressEnter = (e) => {
-        if (e.keyCode === 13) {
-            sendCode();
-        }
-    };
-
 
 
     return (<div>
@@ -91,7 +85,6 @@ function RemindPass() {
                        type="email"
                        id="email"
                        value={email}
-
                        onChange={(e) => setEmail(e.target.value)}
                        required
                 />
@@ -109,7 +102,6 @@ function RemindPass() {
                            type="number"
                            id="code"
                            value={code}
-                           onKeyDown={(e) => pressEnter(e)}
                            onChange={(e) => setCode(e.target.value)}
                     />
                     <button className="button_pass" type="submit">Wyślij kod</button>

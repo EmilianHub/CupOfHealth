@@ -54,7 +54,6 @@ export default function Chat() {
                 data.push({"response": "Twoje objawy: " + val.Objawy + " \n Twoja choroba " + val.Choroba})
                 navigate('/', {replace: true})
                 document.getElementById('message').value = '';
-                Opcje_click();
             }
         })
     }
@@ -74,10 +73,9 @@ export default function Chat() {
         setIsVisible(!isVisible);
     };
 
-
     return (
         <body>
-        { !isVisible && <div className='container'>
+        <div className='container'>
             <div className="chat-window">
                 <h2>CupOf Health</h2>
                 <h4>Twoje zdrowie jest dla nas najważniejsze!</h4>
@@ -105,11 +103,11 @@ export default function Chat() {
                            }}/>
                     <div>
                         <button id={"send"} onClick={sendMessage}>Wyślij</button>
-                        <button onClick={Opcje_click} className={"history-trigger1"}> > </button>
+                        <button onClick={Opcje_click} className={"history-trigger"}>Opcje</button>
                     </div>
                 </div>
             </div>
-        </div>}
+        </div>
         {isVisible && <div className="history">
             <div className="history_user">
                 <h4>Twoje diagnozy</h4>
@@ -128,7 +126,6 @@ export default function Chat() {
                 -Zachorowania: //nazwa regionu// <br/>
                 - Opisz //nazwa choroby//
             </div>
-            <button onClick={Opcje_click} className={"history-trigger2"}> > </button>
         </div>}
         </body>
     )

@@ -37,7 +37,7 @@ export default function Chat() {
             }).catch((error) => {
             console.log(error)
         })
-    };
+    }
 
     const pressEnter = (e) => {
         if (e.keyCode === 13) {
@@ -68,7 +68,6 @@ export default function Chat() {
                     console.log(result.data)
             })
         }
-        console.log(userHistory)
     }
 
     return (
