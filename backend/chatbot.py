@@ -8,6 +8,7 @@ from keras.models import Sequential
 from keras.optimizers import SGD
 from sqlalchemy import select
 
+from miastaJPA import Miasta
 from chorobyJPA import Diseases
 from dbConnection import db_session
 from patternsJPA import Patterns
@@ -21,11 +22,11 @@ documents = []
 ignore_words = nlp.Defaults.stop_words
 ignore_words.update({'?', '!', ",", ">", "<", "``", "''", ".", "-", '\n'})
 
-casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(Patterns.pattern_group != TagGroup.opis)).fetchall()
+casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group != TagGroup.leczenie).where(
+    Patterns.pattern_group != TagGroup.opis)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
 opisPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.opis)).fetchall()
-
 
 for pattern in casualPatterns:
     tokenizedWord = nlp(pattern.pattern)
@@ -37,7 +38,6 @@ for pattern in casualPatterns:
 
     if str(pattern.pattern_group.value) not in classes:
         classes.append(str(pattern.pattern_group.value))
-
 
 for disease in casualDiseases:
     for symptom in disease.objawy:
@@ -51,7 +51,6 @@ for disease in casualDiseases:
         if str(disease.choroba) not in classes:
             classes.append(str(disease.choroba))
 
-
 for disease in casualDiseases:
     for q in opisPatterns:
         tokenizedWord = nlp(f"{q.pattern} {disease.choroba}")
@@ -63,7 +62,6 @@ for disease in casualDiseases:
 
         if f"opis: {disease.choroba}" not in classes:
             classes.append(str(f"opis: {disease.choroba}"))
-
 
 for p in casualDiseases:
     for pattern in leczeniePatterns:
@@ -81,11 +79,11 @@ for p in casualDiseases:
 words = sorted(list(set(words)))
 classes = sorted(list(set(classes)))
 
-print(len(documents), "documents")
-
-print(len(classes), "classes", classes)
-
-print(len(words), "unique lemmatized words", words)
+# print(len(documents), "documents")
+#
+# print(len(classes), "classes", classes)
+#
+# print(len(words), "unique lemmatized words", words)
 
 pickle.dump(words, open('words.pkl', 'wb'))
 pickle.dump(classes, open('classes.pkl', 'wb'))
@@ -128,7 +126,7 @@ model.add(Dense(len(train_y[0]), activation='softmax'))
 
 # Compile model. Stochastic gradient descent with Nesterov accelerated gradient gives good results for this model
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
 # fitting and saving the model
 hist = model.fit(np.array(train_x), np.array(train_y), epochs=200, batch_size=5, verbose=1)
