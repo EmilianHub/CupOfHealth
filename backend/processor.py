@@ -29,7 +29,6 @@ words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
 userService = UserService()
 nlp = spacy.load("pl_core_news_md")
-openai.api_key = "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"
 stopword = nlp.Defaults.stop_words
 
 
@@ -72,6 +71,7 @@ def predict_class(sentence):
 
 
 def generate_chat_response(message):
+    openai.api_key = "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"
     response = openai.Completion.create(
         model="text-davinci-002",
         prompt=message,
@@ -96,8 +96,6 @@ def getResponse(ints, msg):
             return showLeczenie(tag)
         if tag.startswith("opis"):
             return getOpisChoroby(msg)
-        # if tag.startswith("lokalizacja"):
-        #     return findDiseaseForRegion(tag)
         if isCasualResponse(tag):
             return retrieveCausalResponse(tag, msg)
 
@@ -159,8 +157,8 @@ def retrieveDiseaseResponse(ints, isForced):
 
 
 def calculatePercent(percent):
-    if percent > 100:
-        return 100
+    if percent > 90:
+        return 90
     else:
         return percent
 
@@ -194,7 +192,10 @@ def calculateConfidence(occurrences, ints):
         if symptomsAmount is None:
             confidence[k] = [0, 0]
         else:
-            if ints is not None and ints[0]['intent'] == k:
+            if len(symptomsAmount.objawy) == 1:
+                arr = [0.7, 0.7]
+                confidence[k] = arr
+            elif ints is not None and ints[0]['intent'] == k:
                 chatbotProbability = v / len(symptomsAmount.objawy) + float(ints[0]['probability'])
                 arr = [v / len(symptomsAmount.objawy), chatbotProbability]
                 confidence[k] = arr

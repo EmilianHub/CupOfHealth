@@ -75,28 +75,6 @@ for p in casualDiseases:
         if f"leczenie: {p.choroba}" not in classes:
             classes.append(str(f"leczenie: {p.choroba}"))
 
-# for miasto in miasto_woj:
-#     for pattern in locaPatterns:
-#         tokenizedWordMiasto = nlp(f"{pattern.pattern} {miasto.nazwa}")
-#         miasto_words = [token.text.lower() for token in tokenizedWordMiasto if token.lemma_ not in ignore_words]
-#         miasto_words += [token.lemma_.lower() for token in tokenizedWordMiasto if token.lemma_ not in ignore_words]
-#
-#         words.extend(miasto_words)
-#         documents.append((miasto_words, f"lokalizacja: {miasto.nazwa}"))
-#
-#         if f"lokalizacja: {miasto.nazwa}" not in classes:
-#             classes.append(f"lokalizacja: {miasto.nazwa}")
-#
-#         tokenizedWordWoj = nlp(f"{pattern.pattern} {miasto.wojewodztwa.nazwa}")
-#         wojewodztwa_words = [token.text.lower() for token in tokenizedWordWoj if token.lemma_ not in ignore_words]
-#         wojewodztwa_words += [token.lemma_.lower() for token in tokenizedWordWoj if token.lemma_ not in ignore_words]
-#
-#         words.extend(wojewodztwa_words)
-#         documents.append((wojewodztwa_words, f"lokalizacja: {miasto.wojewodztwa.nazwa}"))
-#
-#         if f": {miasto.wojewodztwa.nazwa}" not in classes:
-#             classes.append(f"lokalizacja: {miasto.wojewodztwa.nazwa}")
-
 
 words = sorted(list(set(words)))
 classes = sorted(list(set(classes)))
@@ -148,7 +126,7 @@ model.add(Dense(len(train_y[0]), activation='softmax'))
 
 # Compile model. Stochastic gradient descent with Nesterov accelerated gradient gives good results for this model
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
 # fitting and saving the model
 hist = model.fit(np.array(train_x), np.array(train_y), epochs=200, batch_size=5, verbose=1)
