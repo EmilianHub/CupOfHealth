@@ -26,9 +26,7 @@ casualPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_grou
     Patterns.pattern_group != TagGroup.opis)).fetchall()
 casualDiseases = db_session.scalars(select(Diseases)).fetchall()
 leczeniePatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.leczenie)).fetchall()
-locaPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.loca)).fetchall()
 opisPatterns = db_session.scalars(select(Patterns).where(Patterns.pattern_group == TagGroup.opis)).fetchall()
-miasto_woj = db_session.scalars(select(Miasta)).fetchall()
 
 for pattern in casualPatterns:
     tokenizedWord = nlp(pattern.pattern)
