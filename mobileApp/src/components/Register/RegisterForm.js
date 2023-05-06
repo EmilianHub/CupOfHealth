@@ -30,6 +30,7 @@ const Login = () => {
             )
                 window.alert("Złe dane rejestracyjne");
             console.log(error);
+
         });
     }
 
@@ -44,6 +45,12 @@ const Login = () => {
         }
         setIdentical(false)
     }
+    const pressEnter = (e) => {
+        if (e.keyCode === 13) {
+            subForm();
+        }
+    };
+
 
     return (
         <div className={"Card1_r"}>
@@ -73,6 +80,7 @@ const Login = () => {
                     <label className={"labelStyle1_r"}>Potwierdź hasło:</label><br/>
                     <input type="password"
                            className={"inputStyle1_r"}
+                           onKeyDown={(e) => pressEnter(e)}
                            onChange={(v) => {
                                verifyPasswordsAreIdentical(v.target.value)
                                setRetypePassword(v.target.value)
